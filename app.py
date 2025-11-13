@@ -1,5 +1,5 @@
 import os
-import pickle
+import joblib
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
@@ -24,10 +24,8 @@ def load_models():
     if MODEL is None:
         logger.info("Loading ML models...")
         try:
-            with open('textcat_model.pkl', 'rb') as f:
-                MODEL = pickle.load(f)
-            with open('tfidf_vectorizer.pkl', 'rb') as f:
-                VECTORIZER = pickle.load(f)
+            MODEL = joblib.load('textcat_model.pkl')
+            VECTORIZER = joblib.load('tfidf_vectorizer.pkl')
             logger.info("✅ Models loaded successfully")
         except Exception as e:
             logger.error(f"❌ Failed to load models: {e}")

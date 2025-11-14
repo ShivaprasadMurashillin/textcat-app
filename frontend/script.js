@@ -5,12 +5,12 @@
 
 // Configuration
 const CONFIG = {
-  // API URL - will be updated after Render deployment
+  // API URL - Render production backend
   API_BASE_URL: (window.location.hostname === 'localhost' || 
                  window.location.hostname === '127.0.0.1' || 
                  window.location.protocol === 'file:')
     ? 'http://127.0.0.1:5000'  // Local development
-    : 'https://YOUR-RENDER-APP.onrender.com',  // Production (update after deploying to Render)
+    : 'https://textcat-app.onrender.com',  // Production backend
   
   ENDPOINTS: {
     PREDICT: '/predict',

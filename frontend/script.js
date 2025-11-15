@@ -97,6 +97,8 @@ let elements = {};
  * Initialize application
  */
 function init() {
+  console.log('🚀 Initializing Text Categorization System...');
+  
   // Cache DOM elements
   elements = {
     feedbackInput: document.getElementById('feedbackInput'),
@@ -111,42 +113,77 @@ function init() {
     apiStatus: document.getElementById('apiStatus')
   };
   
+  // Verify critical elements
+  if (!elements.feedbackInput || !elements.predictBtn) {
+    console.error('❌ Critical elements missing!');
+    return;
+  }
+  
   // Attach event listeners
-  elements.predictBtn.addEventListener('click', handlePredict);
-  elements.clearBtn.addEventListener('click', handleClear);
+  if (elements.predictBtn) elements.predictBtn.addEventListener('click', handlePredict);
+  if (elements.clearBtn) elements.clearBtn.addEventListener('click', handleClear);
   if (elements.pasteExampleBtn) elements.pasteExampleBtn.addEventListener('click', useQuickExample);
   
   // Random example button
   const randomExampleBtn = document.getElementById('randomExample');
   if (randomExampleBtn) {
-    randomExampleBtn.addEventListener('click', loadRandomExample);
+    console.log('✅ Random example button found');
+    randomExampleBtn.addEventListener('click', () => {
+      console.log('🎲 Random example clicked');
+      loadRandomExample();
+    });
+  } else {
+    console.warn('⚠️ Random example button not found');
   }
   
-  elements.feedbackInput.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'Enter') {
-      handlePredict();
-    }
-  });
+  if (elements.feedbackInput) {
+    elements.feedbackInput.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        handlePredict();
+      }
+    });
+  }
 
   // Additional controls
   const darkToggle = document.getElementById('darkModeToggle');
   if (darkToggle) {
-    darkToggle.addEventListener('change', (e) => toggleDarkMode(e.target.checked));
+    console.log('✅ Dark mode toggle found');
+    darkToggle.addEventListener('change', (e) => {
+      console.log('🌙 Dark mode toggled:', e.target.checked);
+      toggleDarkMode(e.target.checked);
+    });
     // restore preference
     const saved = localStorage.getItem('ui:dark');
-    if (saved === '1') darkToggle.checked = true, toggleDarkMode(true);
+    if (saved === '1') {
+      darkToggle.checked = true;
+      toggleDarkMode(true);
+    }
+  } else {
+    console.warn('⚠️ Dark mode toggle not found');
   }
 
   const copyBtn = document.getElementById('copyResultBtn');
-  if (copyBtn) copyBtn.addEventListener('click', copyResultToClipboard);
+  if (copyBtn) {
+    console.log('✅ Copy button found');
+    copyBtn.addEventListener('click', () => {
+      console.log('📋 Copy button clicked');
+      copyResultToClipboard();
+    });
+  } else {
+    console.warn('⚠️ Copy button not found');
+  }
 
   // Clear input button
   const clearInputBtn = document.getElementById('clearInput');
-  if (clearInputBtn) clearInputBtn.addEventListener('click', handleClear);
+  if (clearInputBtn) {
+    console.log('✅ Clear input button found');
+    clearInputBtn.addEventListener('click', handleClear);
+  }
 
   // Clear history button
   const clearHistoryBtn = document.getElementById('clearHistory');
   if (clearHistoryBtn) {
+    console.log('✅ Clear history button found');
     clearHistoryBtn.addEventListener('click', () => {
       if (confirm('Clear all classification history?')) {
         localStorage.removeItem('tc:history:v1');
@@ -157,9 +194,11 @@ function init() {
 
   // Example chip buttons
   const exampleChips = document.querySelectorAll('.example-chip');
-  exampleChips.forEach(chip => {
+  console.log(`✅ Found ${exampleChips.length} example chips`);
+  exampleChips.forEach((chip, index) => {
     chip.addEventListener('click', () => {
       const exampleText = chip.getAttribute('data-text');
+      console.log(`📝 Example chip ${index + 1} clicked:`, exampleText);
       if (exampleText) {
         elements.feedbackInput.value = exampleText;
         elements.feedbackInput.focus();
@@ -171,16 +210,20 @@ function init() {
   });
 
   // Character counter
-  elements.feedbackInput.addEventListener('input', updateCharCount);
-  updateCharCount(); // Initialize
+  if (elements.feedbackInput) {
+    elements.feedbackInput.addEventListener('input', updateCharCount);
+    updateCharCount(); // Initialize
+  }
 
   // Render saved history
   renderHistory();
   
   // Check API health
-  checkAPIHealth();
+  if (elements.apiStatus) {
+    checkAPIHealth();
+  }
   
-  console.log('✅ Text Categorization System initialized');
+  console.log('✅ Text Categorization System initialized successfully');
 }
 
 /**
@@ -422,14 +465,52 @@ function escapeHtml(str) {
 }
 
 function copyResultToClipboard() {
+  console.log('📋 Copy function called');
   try {
-    const text = elements.resultContent ? elements.resultContent.innerText : '';
-    if (!text) return showError('No result to copy');
+    if (!elements.resultContent) {
+      console.error('❌ Result content element not found');
+      return showError('Result element not found');
+    }
+    
+    const text = elements.resultContent.innerText || elements.resultContent.textContent;
+    console.log('📄 Text to copy:', text.substring(0, 50) + '...');
+    
+    if (!text || text.trim().length === 0) {
+      console.warn('⚠️ No result text to copy');
+      return showError('No result to copy');
+    }
+    
+    if (!navigator.clipboard) {
+      console.error('❌ Clipboard API not available');
+      return showError('Clipboard not supported in this browser');
+    }
+    
     navigator.clipboard.writeText(text).then(() => {
-      elements.apiStatus.textContent = '📋 Result copied';
-      setTimeout(() => checkAPIHealth(), 1000);
-    }).catch((e)=> showError('Copy failed'));
-  } catch(e) { showError('Copy not supported'); }
+      console.log('✅ Text copied successfully');
+      if (elements.apiStatus) {
+        const oldText = elements.apiStatus.textContent;
+        elements.apiStatus.textContent = '✅ Result copied!';
+        setTimeout(() => {
+          elements.apiStatus.textContent = oldText;
+        }, 2000);
+      }
+      // Show success message
+      const copyBtn = document.getElementById('copyResultBtn');
+      if (copyBtn) {
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span>✅</span>';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHTML;
+        }, 2000);
+      }
+    }).catch((e) => {
+      console.error('❌ Copy failed:', e);
+      showError('Copy failed: ' + e.message);
+    });
+  } catch(e) {
+    console.error('❌ Copy error:', e);
+    showError('Copy not supported');
+  }
 }
 
 function useQuickExample() {
@@ -456,26 +537,37 @@ function handleClear() {
  * Load a random example text
  */
 function loadRandomExample() {
+  console.log('🎲 Loading random example...');
+  
   // Get all categories
   const categories = Object.keys(EXAMPLE_TEXTS);
+  console.log('📚 Available categories:', categories);
   
   // Pick a random category
   const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+  console.log('🎯 Selected category:', randomCategory);
   
   // Pick a random example from that category
   const examples = EXAMPLE_TEXTS[randomCategory];
   const randomExample = examples[Math.floor(Math.random() * examples.length)];
+  console.log('📝 Selected example:', randomExample);
   
   // Set the text
-  elements.feedbackInput.value = randomExample;
-  elements.feedbackInput.focus();
-  
-  // Update character count
-  updateCharCount();
-  
-  // Clear any existing results/errors
-  hideResult();
-  hideError();
+  if (elements.feedbackInput) {
+    elements.feedbackInput.value = randomExample;
+    elements.feedbackInput.focus();
+    
+    // Update character count
+    updateCharCount();
+    
+    // Clear any existing results/errors
+    hideResult();
+    hideError();
+    
+    console.log('✅ Random example loaded successfully');
+  } else {
+    console.error('❌ Feedback input element not found');
+  }
 }
 
 /**

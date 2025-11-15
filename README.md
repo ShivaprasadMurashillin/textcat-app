@@ -6,9 +6,8 @@
 [![Netlify](https://img.shields.io/badge/Netlify-Frontend-00C7B7?style=flat&logo=netlify)](https://www.netlify.com/)
 [![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat&logo=python)](https://www.python.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3.2-orange?style=flat&logo=scikit-learn)](https://scikit-learn.org/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**Live Demo:** [https://wonderful-truffle-84e414.netlify.app](https://wonderful-truffle-84e414.netlify.app)
+**Live Demo:** [https://textcat.netlify.app](https://textcat.netlify.app)
 
 ---
 
@@ -37,7 +36,7 @@ Automated text categorization system that classifies customer feedback into 5 ac
 │                                                               │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  Frontend (Netlify CDN)                                │ │
-│  │  https://wonderful-truffle-84e414.netlify.app          │ │
+│  │  https://textcat.netlify.app                           │ │
 │  │  • Single & Batch Analysis                             │ │
 │  │  • Dark Mode UI                                        │ │
 │  │  • CSV Upload & Export                                 │ │
@@ -151,73 +150,6 @@ textcat-app/
 
 ---
 
-## 🚀 Deployment
-
-### Prerequisites
-- GitHub account
-- Render account (for backend + database)
-- Netlify account (for frontend)
-
-### Deploy Backend to Render
-
-1. **Connect GitHub Repository**
-   - Go to [Render Dashboard](https://dashboard.render.com/)
-   - Click "New +" → "Web Service"
-   - Connect your GitHub repository: `ShivaprasadMurashillin/textcat-app`
-
-2. **Configure Web Service**
-   ```
-   Name: textcat-app
-   Environment: Python 3
-   Build Command: pip install -r requirements.txt
-   Start Command: gunicorn app:app
-   ```
-
-3. **Set Environment Variables**
-   ```
-   FLASK_ENV=production
-   DATABASE_URL=<your-render-postgres-url>
-   ```
-
-4. **Create PostgreSQL Database**
-   - In Render Dashboard → "New +" → "PostgreSQL"
-   - Name: `textcat-database`
-   - Copy the Internal Database URL
-   - Add it to your web service environment variables as `DATABASE_URL`
-
-5. **Deploy**
-   - Render will automatically build and deploy
-   - Your API will be live at: `https://textcat-app.onrender.com`
-
-### Deploy Frontend to Netlify
-
-1. **Connect GitHub Repository**
-   - Go to [Netlify Dashboard](https://app.netlify.com/)
-   - Click "Add new site" → "Import an existing project"
-   - Choose GitHub and select: `ShivaprasadMurashillin/textcat-app`
-
-2. **Configure Build Settings**
-   ```
-   Base directory: frontend
-   Build command: (leave empty)
-   Publish directory: .
-   ```
-
-3. **Set Environment Variables** (optional)
-   ```
-   API_URL=https://textcat-app.onrender.com
-   ```
-
-4. **Deploy**
-   - Netlify will automatically deploy
-   - Your app will be live at: `https://wonderful-truffle-84e414.netlify.app`
-
-5. **Auto-Deploy on Git Push**
-   - Both Render and Netlify watch the `main` branch
-   - Automatic deployments on every `git push`
-
----
-
 ## 🎯 Features
 
 ### Current Implementation
@@ -272,102 +204,6 @@ textcat-app/
 - ✅ Health check endpoints
 - ✅ Structured logging
 - ✅ Error tracking
-
----
-
-## 📊 API Documentation
-
-### Predict Endpoint
-
-**POST** `/api/predict`
-
-Request:
-```json
-{
-  "feedback": "The app crashes when I try to login"
-}
-```
-
-Response:
-```json
-{
-  "success": true,
-  "prediction": "Bug Report",
-  "confidence": 89.45,
-  "all_probabilities": {
-    "Bug Report": 89.45,
-    "Negative Experience": 7.32,
-    "Feature Request": 1.89,
-    "Pricing Complaint": 0.87,
-    "Positive Feedback": 0.47
-  },
-  "metadata": {
-    "icon": "🐛",
-    "color": "#e74c3c",
-    "priority": "high",
-    "description": "Technical issues or system errors"
-  },
-  "processing_time_ms": 145.23,
-  "timestamp": "2025-01-12T10:30:00Z"
-}
-```
-
-### Health Check
-
-**GET** `/api/health`
-
-Response:
-```json
-{
-  "status": "healthy",
-  "service": "text-categorization-api",
-  "version": "1.0.0",
-  "models_status": "loaded",
-  "timestamp": "2025-01-12T10:30:00Z"
-}
-```
-
----
-
-## 🧪 Testing
-
-```bash
-# Test locally
-python app.py
-
-# Test API endpoint
-curl -X POST http://localhost:5000/api/predict \
-  -H "Content-Type: application/json" \
-  -d '{"feedback": "Great service!"}'
-
-# Test health check
-curl http://localhost:5000/api/health
-
-# Test production API
-curl -X POST https://textcat-app.onrender.com/api/predict \
-  -H "Content-Type: application/json" \
-  -d '{"feedback": "App is very slow"}'
-```
-
----
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create `.env` file for local development:
-
-```env
-FLASK_ENV=development
-FLASK_DEBUG=True
-DATABASE_URL=postgresql://user:password@localhost/textcat_db
-```
-
-For production (Render):
-```env
-FLASK_ENV=production
-DATABASE_URL=<render-postgres-url>
-```
 
 ---
 
@@ -430,12 +266,6 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📝 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
 ## 👨‍💻 Team
 
 **Built by:**
@@ -454,14 +284,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 - Netlify for CDN hosting
 - Dataset contributors
 - Open source community
-
----
-
-## 📞 Support
-
-- 📖 [Documentation](DEPLOYMENT.md)
-- 🐛 [Issue Tracker](https://github.com/ShivaprasadMurashillin/textcat-app/issues)
-- 💬 [Discussions](https://github.com/ShivaprasadMurashillin/textcat-app/discussions)
 
 ---
 

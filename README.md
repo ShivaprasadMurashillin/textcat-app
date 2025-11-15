@@ -269,11 +269,9 @@ Contributions are welcome! Please follow these steps:
 ## 👨‍💻 Team
 
 **Built by:**
-- **Shivaprasad** - Project Lead & ML Engineer
-- **Vaishnavi** - Frontend Developer
-- **Bhavana** - Backend Developer
-
-**GitHub:** [@ShivaprasadMurashillin](https://github.com/ShivaprasadMurashillin)
+- [Shivaprasad](https://github.com/ShivaprasadMurashillin)
+- [Vaishnavi](https://github.com/Vaishnavi-S-K)
+- [Bhavana](https://github.com/Bhavana-V-K)
 
 ---
 

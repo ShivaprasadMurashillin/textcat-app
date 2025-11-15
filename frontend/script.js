@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Text Categorization API Client
  * Production-ready with error handling, retry logic, and monitoring
  * Backend: Flask + scikit-learn ML on Render.com
@@ -65,27 +65,27 @@ const EXAMPLE_TEXTS = {
 // Category styling
 const CATEGORY_STYLES = {
   'Bug Report': {
-    icon: '🐛',
+    icon: '??',
     color: '#e74c3c',
     bgColor: '#fadbd8'
   },
   'Feature Request': {
-    icon: '💡',
+    icon: '??',
     color: '#9b59b6',
     bgColor: '#ebdef0'
   },
   'Pricing Complaint': {
-    icon: '💰',
+    icon: '??',
     color: '#e67e22',
     bgColor: '#fdebd0'
   },
   'Positive Feedback': {
-    icon: '✅',
+    icon: '?',
     color: '#27ae60',
     bgColor: '#d5f4e6'
   },
   'Negative Experience': {
-    icon: '😞',
+    icon: '??',
     color: '#c0392b',
     bgColor: '#f2d7d5'
   }
@@ -98,7 +98,7 @@ let elements = {};
  * Initialize application
  */
 function init() {
-  console.log('ðŸš€ Initializing Text Categorization System...');
+  console.log('🚀 Initializing Text Categorization System...');
   
   // Cache DOM elements
   elements = {
@@ -116,7 +116,7 @@ function init() {
   
   // Verify critical elements
   if (!elements.feedbackInput || !elements.predictBtn) {
-    console.error('âŒ Critical elements missing!');
+    console.error('❌ Critical elements missing!');
     return;
   }
   
@@ -128,13 +128,13 @@ function init() {
   // Random example button
   const randomExampleBtn = document.getElementById('randomExample');
   if (randomExampleBtn) {
-    console.log('âœ… Random example button found');
+    console.log('✅ Random example button found');
     randomExampleBtn.addEventListener('click', () => {
-      console.log('ðŸŽ² Random example clicked');
+      console.log('🎲 Random example clicked');
       loadRandomExample();
     });
   } else {
-    console.warn('âš ï¸ Random example button not found');
+    console.warn('⚠️ Random example button not found');
   }
   
   if (elements.feedbackInput) {
@@ -148,9 +148,9 @@ function init() {
   // Additional controls
   const darkToggle = document.getElementById('darkModeToggle');
   if (darkToggle) {
-    console.log('âœ… Dark mode toggle found');
+    console.log('✅ Dark mode toggle found');
     darkToggle.addEventListener('change', (e) => {
-      console.log('ðŸŒ™ Dark mode toggled:', e.target.checked);
+      console.log('🌙 Dark mode toggled:', e.target.checked);
       toggleDarkMode(e.target.checked);
     });
     // restore preference
@@ -160,31 +160,31 @@ function init() {
       toggleDarkMode(true);
     }
   } else {
-    console.warn('âš ï¸ Dark mode toggle not found');
+    console.warn('⚠️ Dark mode toggle not found');
   }
 
   const copyBtn = document.getElementById('copyResultBtn');
   if (copyBtn) {
-    console.log('âœ… Copy button found');
+    console.log('✅ Copy button found');
     copyBtn.addEventListener('click', () => {
-      console.log('ðŸ“‹ Copy button clicked');
+      console.log('📋 Copy button clicked');
       copyResultToClipboard();
     });
   } else {
-    console.warn('âš ï¸ Copy button not found');
+    console.warn('⚠️ Copy button not found');
   }
 
   // Clear input button
   const clearInputBtn = document.getElementById('clearInput');
   if (clearInputBtn) {
-    console.log('âœ… Clear input button found');
+    console.log('✅ Clear input button found');
     clearInputBtn.addEventListener('click', handleClear);
   }
 
   // Clear history button
   const clearHistoryBtn = document.getElementById('clearHistory');
   if (clearHistoryBtn) {
-    console.log('âœ… Clear history button found');
+    console.log('✅ Clear history button found');
     clearHistoryBtn.addEventListener('click', () => {
       if (confirm('Clear all classification history?')) {
         localStorage.removeItem('tc:history:v1');
@@ -195,11 +195,11 @@ function init() {
 
   // Example chip buttons
   const exampleChips = document.querySelectorAll('.example-chip');
-  console.log(`âœ… Found ${exampleChips.length} example chips`);
+  console.log(`✅ Found ${exampleChips.length} example chips`);
   exampleChips.forEach((chip, index) => {
     chip.addEventListener('click', () => {
       const exampleText = chip.getAttribute('data-text');
-      console.log(`ðŸ“ Example chip ${index + 1} clicked:`, exampleText);
+      console.log(`📝 Example chip ${index + 1} clicked:`, exampleText);
       if (exampleText) {
         elements.feedbackInput.value = exampleText;
         elements.feedbackInput.focus();
@@ -227,7 +227,7 @@ function init() {
   // Initialize Batch Analysis feature
   initBatchAnalysis();
   
-  console.log('âœ… Text Categorization System initialized successfully');
+  console.log('✅ Text Categorization System initialized successfully');
 }
 
 /**
@@ -244,15 +244,15 @@ async function checkAPIHealth() {
     const data = await response.json();
     
     if (data.status === 'healthy') {
-      elements.apiStatus.textContent = 'ðŸŸ¢ Online';
+      elements.apiStatus.textContent = '🟢 Online';
       elements.apiStatus.style.color = '#27ae60';
     } else {
-      elements.apiStatus.textContent = 'ðŸŸ¡ Degraded';
+      elements.apiStatus.textContent = '🟡 Degraded';
       elements.apiStatus.style.color = '#f39c12';
     }
   } catch (error) {
     console.warn('Health check failed:', error);
-    elements.apiStatus.textContent = 'ðŸ”´ Offline';
+    elements.apiStatus.textContent = '🔴 Offline';
     elements.apiStatus.style.color = '#e74c3c';
   }
 }
@@ -414,8 +414,8 @@ function displayResult(data) {
       ` : ''}
       
       <div class="result-meta">
-        <span>â±ï¸ ${processing_time_ms}ms</span>
-        ${data.firestore_id ? `<span>ðŸ“ ID: ${data.firestore_id.substring(0, 8)}...</span>` : ''}
+        <span>⏱️ ${processing_time_ms}ms</span>
+        ${data.firestore_id ? `<span>📝 ID: ${data.firestore_id.substring(0, 8)}...</span>` : ''}
       </div>
     </div>
   `;
@@ -469,17 +469,17 @@ function escapeHtml(str) {
 }
 
 function copyResultToClipboard() {
-  console.log('ðŸ“‹ Copy function called');
+  console.log('📋 Copy function called');
   try {
     if (!elements.resultContent) {
-      console.error('âŒ Result content element not found');
+      console.error('❌ Result content element not found');
       return showError('Result element not found');
     }
     
     // Get the current prediction data from the last result
     const resultCard = elements.resultContent.querySelector('.result-card');
     if (!resultCard) {
-      console.warn('âš ï¸ No result card found');
+      console.warn('⚠️ No result card found');
       return showError('No result to copy');
     }
     
@@ -500,8 +500,8 @@ function copyResultToClipboard() {
     });
     
     // Format the text
-    const formattedText = `ðŸ“ Classification Result
-â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+    const formattedText = `📝 Classification Result
+━━━━━━━━━━━━━━━━━━━━
 
 Input: ${feedbackText}
 
@@ -511,18 +511,18 @@ Confidence: ${confidenceValue}
 All Probabilities:
 ${probabilities.join('\\n')}`;
     
-    console.log('ðŸ“„ Text to copy:', formattedText.substring(0, 100) + '...');
+    console.log('📄 Text to copy:', formattedText.substring(0, 100) + '...');
     
     if (!navigator.clipboard) {
-      console.error('âŒ Clipboard API not available');
+      console.error('❌ Clipboard API not available');
       return showError('Clipboard not supported in this browser');
     }
     
     navigator.clipboard.writeText(formattedText).then(() => {
-      console.log('âœ… Text copied successfully');
+      console.log('✅ Text copied successfully');
       if (elements.apiStatus) {
         const oldText = elements.apiStatus.textContent;
-        elements.apiStatus.textContent = 'âœ… Copied!';
+        elements.apiStatus.textContent = '✅ Copied!';
         setTimeout(() => {
           elements.apiStatus.textContent = oldText;
         }, 2000);
@@ -531,17 +531,17 @@ ${probabilities.join('\\n')}`;
       const copyBtn = document.getElementById('copyResultBtn');
       if (copyBtn) {
         const originalHTML = copyBtn.innerHTML;
-        copyBtn.innerHTML = '<span>âœ…</span>';
+        copyBtn.innerHTML = '<span>✅</span>';
         setTimeout(() => {
           copyBtn.innerHTML = originalHTML;
         }, 2000);
       }
     }).catch((e) => {
-      console.error('âŒ Copy failed:', e);
+      console.error('❌ Copy failed:', e);
       showError('Copy failed: ' + e.message);
     });
   } catch(e) {
-    console.error('âŒ Copy error:', e);
+    console.error('❌ Copy error:', e);
     showError('Copy not supported');
   }
 }
@@ -570,20 +570,20 @@ function handleClear() {
  * Load a random example text
  */
 function loadRandomExample() {
-  console.log('ðŸŽ² Loading random example...');
+  console.log('🎲 Loading random example...');
   
   // Get all categories
   const categories = Object.keys(EXAMPLE_TEXTS);
-  console.log('ðŸ“š Available categories:', categories);
+  console.log('📚 Available categories:', categories);
   
   // Pick a random category
   const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-  console.log('ðŸŽ¯ Selected category:', randomCategory);
+  console.log('🎯 Selected category:', randomCategory);
   
   // Pick a random example from that category
   const examples = EXAMPLE_TEXTS[randomCategory];
   const randomExample = examples[Math.floor(Math.random() * examples.length)];
-  console.log('ðŸ“ Selected example:', randomExample);
+  console.log('📝 Selected example:', randomExample);
   
   // Set the text
   if (elements.feedbackInput) {
@@ -597,9 +597,9 @@ function loadRandomExample() {
     hideResult();
     hideError();
     
-    console.log('âœ… Random example loaded successfully');
+    console.log('✅ Random example loaded successfully');
   } else {
-    console.error('âŒ Feedback input element not found');
+    console.error('❌ Feedback input element not found');
   }
 }
 
@@ -646,7 +646,7 @@ function hideResult() {
 }
 
 function showError(message) {
-  elements.error.textContent = `âŒ ${message}`;
+  elements.error.textContent = `❌ ${message}`;
   elements.error.style.display = 'block';
   elements.error.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -752,12 +752,12 @@ function initBatchAnalysis() {
   if (copySummary) copySummary.addEventListener('click', copyBatchSummary);
   if (copyAllResults) copyAllResults.addEventListener('click', copyAllBatchResults);
 
-  console.log('Ã¢Å“â€¦ Batch Analysis feature initialized');
+  console.log('âœ… Batch Analysis feature initialized');
 }
 
 // Switch between Single and Batch modes
 function switchMode(mode) {
-  console.log(`Ã°Å¸â€â€ž Switching to ${mode} mode`);
+  console.log(`ðŸ”„ Switching to ${mode} mode`);
   batchState.currentMode = mode;
 
   const singleModeBtn = document.getElementById('singleModeBtn');
@@ -831,12 +831,12 @@ Customer support is amazing and very helpful!`;
 
   batchFeedbackInput.value = exampleBatch;
   updateBatchCount();
-  console.log('Ã°Å¸â€œÂ Loaded batch example data');
+  console.log('ðŸ“ Loaded batch example data');
 }
 
 // Handle Batch Analysis
 async function handleBatchAnalysis() {
-  console.log('Ã°Å¸Å¡â‚¬ Starting batch analysis...');
+  console.log('ðŸš€ Starting batch analysis...');
   
   const batchFeedbackInput = document.getElementById('batchFeedbackInput');
   if (!batchFeedbackInput) return;
@@ -914,7 +914,7 @@ async function handleBatchAnalysis() {
   displayBatchResults();
 
   batchState.isProcessing = false;
-  console.log('Ã¢Å“â€¦ Batch analysis complete!', batchState.batchStats);
+  console.log('âœ… Batch analysis complete!', batchState.batchStats);
 }
 
 // Update batch progress display
@@ -1054,7 +1054,7 @@ function renderCategoryChart(categoryCount, total) {
     chartHTML += `
       <div class="chart-bar">
         <div class="chart-label">
-          <span>${style.icon || 'Ã°Å¸â€œÅ '}</span>
+          <span>${style.icon || '&#128202;'}</span>
           <span>${category}</span>
         </div>
         <div class="chart-bar-container">
@@ -1140,9 +1140,9 @@ function renderIndividualResults(results) {
         <div class="result-number">#${result.index}</div>
         <div class="result-feedback">"${truncatedFeedback}"</div>
         <div class="result-prediction">
-          <span class="result-arrow">Ã¢â€ â€™</span>
+          <span class="result-arrow">&rarr;</span>
           <div class="result-category">
-            <span>${style.icon || 'Ã°Å¸â€œÅ '}</span>
+            <span>${style.icon || '&#128202;'}</span>
             <span>${result.prediction}</span>
           </div>
           <span class="result-confidence">${result.confidence}%</span>
@@ -1202,7 +1202,7 @@ function copyBatchSummary() {
   
   const stats = batchState.batchStats;
   
-  let summary = `ðŸ“Š Batch Analysis Summary\n`;
+  let summary = `📊 Batch Analysis Summary\n`;
   summary += `${'='.repeat(50)}\n\n`;
   summary += `Total Analyzed: ${stats.total} feedbacks\n`;
   summary += `Most Common: ${stats.topCategory} (${stats.topCategoryCount} feedbacks)\n`;
@@ -1252,13 +1252,13 @@ function copyAllBatchResults() {
     return;
   }
   
-  let text = `ðŸ“ Complete Batch Analysis Results\n`;
+  let text = `📝 Complete Batch Analysis Results\n`;
   text += `${'='.repeat(70)}\n\n`;
   
   results.forEach(r => {
     const style = CATEGORY_STYLES[r.prediction] || {};
     text += `${r.index}. "${r.feedback}"\n`;
-    text += `   â†’ ${style.icon || 'ðŸ“Š'} ${r.prediction} (${r.confidence}%)\n\n`;
+    text += `   → ${style.icon || '&#128202;'} ${r.prediction} (${r.confidence}%)\n\n`;
   });
 
   navigator.clipboard.writeText(text).then(() => {
@@ -1288,7 +1288,7 @@ function showSuccess(message) {
   const apiStatus = document.getElementById('apiStatus');
   if (apiStatus) {
     const oldText = apiStatus.textContent;
-    apiStatus.textContent = 'Ã¢Å“â€¦ ' + message;
+    apiStatus.textContent = 'âœ… ' + message;
     apiStatus.style.color = '#27ae60';
     setTimeout(() => {
       apiStatus.textContent = oldText;
@@ -1297,7 +1297,7 @@ function showSuccess(message) {
   }
 }
 
-console.log('Ã°Å¸â€œÅ  Batch Analysis module loaded');
+console.log('ðŸ“Š Batch Analysis module loaded');
 
 
 
@@ -1382,7 +1382,7 @@ function parseCSV(text) {
     }
   }
 
-  console.log(`✅ Extracted ${feedbacks.length} feedbacks from CSV`);
+  console.log(`? Extracted ${feedbacks.length} feedbacks from CSV`);
   return feedbacks;
 }
 

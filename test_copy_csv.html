@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Copy & CSV Upload</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .test-section { border: 2px solid #ddd; padding: 15px; margin: 20px 0; border-radius: 8px; }
+    .test-section h2 { margin-top: 0; color: #333; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #3498db; color: white; border: none; border-radius: 5px; }
+    button:hover { background: #2980b9; }
+    .success { color: #27ae60; font-weight: bold; }
+    .error { color: #e74c3c; font-weight: bold; }
+    #csvContent { width: 100%; height: 200px; font-family: monospace; }
+    #result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test Copy Functions & CSV Upload</h1>
+
+  <div class="test-section">
+    <h2>Test 1: Copy Functions with Null Checks</h2>
+    <p>This tests if copy functions properly handle missing batch data</p>
+    <button onclick="testCopyWithoutData()">Test Copy Summary (No Data)</button>
+    <button onclick="testCopyResultsWithoutData()">Test Copy Results (No Data)</button>
+    <div id="result1"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Clipboard API Detection</h2>
+    <p>Check if browser supports clipboard API</p>
+    <button onclick="testClipboardAPI()">Check Clipboard Support</button>
+    <div id="result2"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: CSV Parsing</h2>
+    <p>Upload a CSV file to test parsing (comma or semicolon delimited)</p>
+    <input type="file" id="testCSV" accept=".csv">
+    <button onclick="testCSVUpload()">Parse CSV</button>
+    <div id="result3"></div>
+    <textarea id="csvContent" placeholder="Parsed feedbacks will appear here..."></textarea>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 4: CSV Parsing with Sample Data</h2>
+    <button onclick="testCSVParsing()">Test CSV Parser</button>
+    <div id="result4"></div>
+  </div>
+
+  <script>
+    // Mock batchState for testing
+    const batchState = {
+      batchStats: null,
+      batchResults: []
+    };
+
+    // Test copy without data
+    function testCopyWithoutData() {
+      const result = document.getElementById('result1');
+      if (!batchState.batchStats) {
+        result.innerHTML = '<span class="success">✅ Null check working: No batch stats detected</span>';
+      } else {
+        result.innerHTML = '<span class="error">❌ Null check failed: batchStats should be null</span>';
+      }
+    }
+
+    function testCopyResultsWithoutData() {
+      const result = document.getElementById('result1');
+      if (!batchState.batchResults || batchState.batchResults.length === 0) {
+        result.innerHTML += '<br><span class="success">✅ Null check working: No batch results detected</span>';
+      } else {
+        result.innerHTML += '<br><span class="error">❌ Null check failed: batchResults should be empty</span>';
+      }
+    }
+
+    // Test clipboard API
+    function testClipboardAPI() {
+      const result = document.getElementById('result2');
+      if (navigator.clipboard) {
+        result.innerHTML = '<span class="success">✅ Clipboard API is available</span>';
+        result.innerHTML += '<br>Methods: ' + Object.keys(navigator.clipboard).join(', ');
+      } else {
+        result.innerHTML = '<span class="error">❌ Clipboard API not supported</span>';
+        result.innerHTML += '<br>Note: HTTPS is required for clipboard access';
+      }
+    }
+
+    // CSV Parser function (same as in script.js)
+    function parseCSVLine(line, delimiter = ',') {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === delimiter && !inQuotes) {
+          result.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+
+      result.push(current);
+      return result;
+    }
+
+    function parseCSV(text) {
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+      if (lines.length === 0) return [];
+
+      const firstLine = lines[0];
+      const delimiter = firstLine.includes(';') && !firstLine.includes(',') ? ';' : ',';
+
+      const headers = parseCSVLine(lines[0], delimiter).map(h => h.toLowerCase().trim());
+      
+      let feedbackIndex = headers.findIndex(h => 
+        h.includes('feedback') || h.includes('text') || h.includes('comment') || h.includes('review')
+      );
+
+      if (feedbackIndex === -1 && headers.length >= 2) {
+        feedbackIndex = 1;
+      }
+
+      if (feedbackIndex === -1) {
+        feedbackIndex = 0;
+      }
+
+      const feedbacks = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = parseCSVLine(lines[i], delimiter);
+        if (row.length > feedbackIndex && row[feedbackIndex].trim()) {
+          feedbacks.push(row[feedbackIndex].trim());
+        }
+      }
+
+      return feedbacks;
+    }
+
+    // Test CSV upload
+    async function testCSVUpload() {
+      const fileInput = document.getElementById('testCSV');
+      const file = fileInput.files[0];
+      const result = document.getElementById('result3');
+      const csvContent = document.getElementById('csvContent');
+
+      if (!file) {
+        result.innerHTML = '<span class="error">❌ No file selected</span>';
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        const feedbacks = parseCSV(text);
+        
+        result.innerHTML = `<span class="success">✅ Successfully parsed ${feedbacks.length} feedbacks from ${file.name}</span>`;
+        csvContent.value = feedbacks.join('\n');
+      } catch (error) {
+        result.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+      }
+    }
+
+    // Test with sample data
+    function testCSVParsing() {
+      const result = document.getElementById('result4');
+      
+      const sampleCSV1 = `Index,Feedback
+1,Fantastic user experience from start to finish!
+2,The live chat feature never connects to an agent.
+3,The export function generates corrupted files.`;
+
+      const sampleCSV2 = `ID;Text;Rating
+001;"Great product, highly recommend!";5
+002;"Poor customer service";2`;
+
+      const sampleCSV3 = `Comment
+This is a single column CSV
+Another feedback here
+Third item`;
+
+      const tests = [
+        { name: 'Standard CSV (Index, Feedback)', data: sampleCSV1 },
+        { name: 'Semicolon delimiter with quotes', data: sampleCSV2 },
+        { name: 'Single column', data: sampleCSV3 }
+      ];
+
+      let output = '';
+      tests.forEach((test, i) => {
+        const feedbacks = parseCSV(test.data);
+        output += `<strong>Test ${i + 1}: ${test.name}</strong><br>`;
+        output += `Parsed ${feedbacks.length} feedbacks: <em>${feedbacks.join(', ')}</em><br><br>`;
+      });
+
+      result.innerHTML = output;
+    }
+  </script>
+</body>
+</html>

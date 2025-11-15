@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Button Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .status {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    button {
+      padding: 12px 24px;
+      margin: 10px 5px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #3498db;
+      color: white;
+      transition: background 0.3s;
+    }
+    button:hover { background: #2980b9; }
+    button:active { transform: scale(0.98); }
+    #output {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Frontend Button Test</h1>
+    
+    <div id="status" class="status info">
+      Loading... Checking if script.js loads correctly
+    </div>
+    
+    <h2>Test Buttons:</h2>
+    <button onclick="testPredictButton()">Test Predict Button</button>
+    <button onclick="testRandomExample()">Test Random Example</button>
+    <button onclick="testCopyButton()">Test Copy Button</button>
+    <button onclick="testCSVUpload()">Test CSV Functions</button>
+    <button onclick="testBatchAnalysis()">Test Batch Analysis</button>
+    
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const output = document.getElementById('output');
+    const status = document.getElementById('status');
+    
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      output.innerHTML += `[${timestamp}] ${message}\n`;
+      output.scrollTop = output.scrollHeight;
+    }
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      log('✅ DOM Content Loaded', 'success');
+      
+      // Check if main script.js functions exist
+      const functions = [
+        'handlePredict',
+        'handleClear', 
+        'loadRandomExample',
+        'copyResultToClipboard',
+        'handleBatchAnalysis',
+        'handleCSVUpload',
+        'parseCSV'
+      ];
+      
+      let allLoaded = true;
+      functions.forEach(fn => {
+        const exists = typeof window[fn] !== 'undefined';
+        log(`${exists ? '✅' : '❌'} ${fn} ${exists ? 'loaded' : 'NOT FOUND'}`);
+        if (!exists) allLoaded = false;
+      });
+      
+      if (allLoaded) {
+        status.className = 'status success';
+        status.textContent = '✅ All functions loaded successfully! Buttons should work.';
+      } else {
+        status.className = 'status error';
+        status.textContent = '❌ Some functions missing - check console for errors';
+      }
+    });
+    
+    function testPredictButton() {
+      log('🔍 Testing Predict Button...');
+      const btn = document.getElementById('predictBtn');
+      if (!btn) {
+        log('❌ predictBtn element not found in DOM');
+        return;
+      }
+      log('✅ predictBtn found, checking event listener...');
+      btn.click();
+      log('📝 Button clicked - check if handlePredict was called');
+    }
+    
+    function testRandomExample() {
+      log('🎲 Testing Random Example...');
+      if (typeof loadRandomExample === 'function') {
+        try {
+          loadRandomExample();
+          log('✅ loadRandomExample() executed successfully');
+        } catch (e) {
+          log(`❌ Error: ${e.message}`);
+        }
+      } else {
+        log('❌ loadRandomExample function not found');
+      }
+    }
+    
+    function testCopyButton() {
+      log('📋 Testing Copy Function...');
+      if (typeof copyResultToClipboard === 'function') {
+        try {
+          copyResultToClipboard();
+          log('✅ copyResultToClipboard() executed');
+        } catch (e) {
+          log(`❌ Error: ${e.message}`);
+        }
+      } else {
+        log('❌ copyResultToClipboard function not found');
+      }
+    }
+    
+    function testCSVUpload() {
+      log('📁 Testing CSV Functions...');
+      if (typeof parseCSV === 'function') {
+        const testCSV = `Index,Feedback
+1,This is a test feedback
+2,Another feedback here`;
+        try {
+          const result = parseCSV(testCSV);
+          log(`✅ parseCSV worked! Extracted ${result.length} feedbacks:`);
+          result.forEach((f, i) => log(`  ${i+1}. ${f}`));
+        } catch (e) {
+          log(`❌ Error: ${e.message}`);
+        }
+      } else {
+        log('❌ parseCSV function not found');
+      }
+    }
+    
+    function testBatchAnalysis() {
+      log('📊 Testing Batch Analysis...');
+      if (typeof handleBatchAnalysis === 'function') {
+        log('✅ handleBatchAnalysis function exists');
+      } else {
+        log('❌ handleBatchAnalysis function not found');
+      }
+      
+      if (typeof copyBatchSummary === 'function') {
+        log('✅ copyBatchSummary function exists');
+      } else {
+        log('❌ copyBatchSummary function not found');
+      }
+      
+      if (typeof copyAllBatchResults === 'function') {
+        log('✅ copyAllBatchResults function exists');
+      } else {
+        log('❌ copyAllBatchResults function not found');
+      }
+    }
+  </script>
+  
+  <!-- Load the main script to test if it loads without errors -->
+  <script src="script.js"></script>
+</body>
+</html>

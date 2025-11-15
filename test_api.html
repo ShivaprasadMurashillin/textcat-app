@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Render API</title>
+</head>
+<body>
+    <h1>Test Production API</h1>
+    <button onclick="testHealth()">Test Health</button>
+    <button onclick="testPredict()">Test Predict</button>
+    <pre id="output"></pre>
+
+    <script>
+        const API = 'https://textcat-app.onrender.com';
+        
+        async function testHealth() {
+            const output = document.getElementById('output');
+            output.textContent = 'Testing health endpoint...\n';
+            
+            try {
+                const response = await fetch(`${API}/health`);
+                const data = await response.json();
+                output.textContent += JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent += 'Error: ' + error.message;
+            }
+        }
+        
+        async function testPredict() {
+            const output = document.getElementById('output');
+            output.textContent = 'Testing predict endpoint...\n';
+            
+            try {
+                const response = await fetch(`${API}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        feedback: 'This product is absolutely amazing! Best purchase ever!'
+                    })
+                });
+                
+                const data = await response.json();
+                output.textContent += `Status: ${response.status}\n`;
+                output.textContent += JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent += 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

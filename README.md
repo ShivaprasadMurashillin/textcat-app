@@ -1,11 +1,14 @@
 # Text Categorization System 🧾
 
-> AI-powered customer feedback analysis system using Machine Learning and Firebase Cloud Platform
+> AI-powered customer feedback analysis system using Machine Learning, Render, and Netlify
 
-[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)](https://firebase.google.com/)
-[![Python](https://img.shields.io/badge/Python-3.12-blue?style=flat&logo=python)](https://www.python.org/)
+[![Render](https://img.shields.io/badge/Render-Backend-purple?style=flat&logo=render)](https://render.com/)
+[![Netlify](https://img.shields.io/badge/Netlify-Frontend-00C7B7?style=flat&logo=netlify)](https://www.netlify.com/)
+[![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat&logo=python)](https://www.python.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3.2-orange?style=flat&logo=scikit-learn)](https://scikit-learn.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+**Live Demo:** [https://wonderful-truffle-84e414.netlify.app](https://wonderful-truffle-84e414.netlify.app)
 
 ---
 
@@ -25,28 +28,53 @@ Automated text categorization system that classifies customer feedback into 5 ac
 
 ## 🏗️ Architecture
 
-### Current (Local Development)
+### Production Stack (Render + Netlify)
+
 ```
-Frontend (HTML/CSS/JS) ──▶ Flask API ──▶ Firebase Firestore
-         Port 8080          Port 5000         (Database)
-                               │
-                               ├──▶ ML Model (Naive Bayes)
-                               └──▶ TF-IDF Vectorizer
+┌──────────────────────────────────────────────────────────────┐
+│              Netlify + Render Architecture                    │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  Frontend (Netlify CDN)                                │ │
+│  │  https://wonderful-truffle-84e414.netlify.app          │ │
+│  │  • Single & Batch Analysis                             │ │
+│  │  • Dark Mode UI                                        │ │
+│  │  • CSV Upload & Export                                 │ │
+│  │  • Real-time Statistics                                │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                           │                                   │
+│                           │ HTTPS API Calls                   │
+│                           ▼                                   │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  Backend API (Render Web Service)                      │ │
+│  │  https://textcat-app.onrender.com                      │ │
+│  │  • Flask REST API                                      │ │
+│  │  • ML Model (Naive Bayes)                              │ │
+│  │  • TF-IDF Vectorizer                                   │ │
+│  │  • Health Check Endpoint                               │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                           │                                   │
+│                           │                                   │
+│                           ▼                                   │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  Database (Render PostgreSQL)                          │ │
+│  │  • User feedback storage                               │ │
+│  │  • Classification history                              │ │
+│  │  • Analytics data                                      │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-### Production (Firebase Cloud)
-```
-Firebase Hosting ──▶ Cloud Functions ──▶ Cloud Storage (Models)
-  (Frontend CDN)      (Python Runtime)   └──▶ Firestore (Database)
-```
+### Local Development
 
-### Future (IaaS - AWS/Azure)
 ```
-CloudFront/CDN ──▶ Load Balancer ──▶ Auto-Scaling Group
-                        │                  │
-                        │              Docker Containers
-                        │                  │
-                        └──────────────────┴──▶ RDS Database
+Frontend (HTML/CSS/JS) ──▶ Flask API (Port 5000) ──▶ Local Storage
+         Port 8080                │                    (Browser)
+                                 │
+                                 ├──▶ ML Model (Naive Bayes)
+                                 └──▶ TF-IDF Vectorizer
 ```
 
 ---
@@ -57,26 +85,30 @@ CloudFront/CDN ──▶ Load Balancer ──▶ Auto-Scaling Group
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/yourusername/text-categorization.git
-cd text-categorization
+git clone https://github.com/ShivaprasadMurashillin/textcat-app.git
+cd textcat-app
 
 # 2. Create virtual environment
 python -m venv .venv
 .venv\Scripts\activate  # Windows
-# source .venv/bin/activate  # Mac/Linux
+# OR
+source .venv/bin/activate  # macOS/Linux
 
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Start Flask backend
+# 4. Train the model (if needed)
+python train_model.py
+
+# 5. Run Flask backend
 python app.py
+# Backend will run on http://localhost:5000
 
-# 5. Start frontend (new terminal)
+# 6. Open frontend (in a new terminal)
 cd frontend
+# Open index.html in a browser, or use:
 python -m http.server 8080
-
-# 6. Open browser
-# http://localhost:8080
+# Frontend will run on http://localhost:8080
 ```
 
 ### Docker Deployment
@@ -92,58 +124,97 @@ docker-compose up -d
 
 ---
 
-## 🚀 Firebase Cloud Deployment
+## 📁 Project Structure
 
-See detailed instructions in [DEPLOYMENT.md](DEPLOYMENT.md)
-
-### Quick Deploy
-
-```bash
-# 1. Install Firebase CLI
-npm install -g firebase-tools
-
-# 2. Login to Firebase
-firebase login
-
-# 3. Upload ML models
-python scripts/upload_models.py
-
-# 4. Deploy everything
-firebase deploy
-
-# Your app is live! 🎉
-# https://your-project.web.app
+```
+textcat-app/
+├── frontend/                 # Netlify deployment
+│   ├── index.html           # Main UI with batch analysis
+│   ├── style.css            # Dark mode + responsive design
+│   ├── script.js            # App logic + CSV upload
+│   └── sample_feedbacks.csv # Example CSV for testing
+│
+├── app.py                   # Flask API (Render deployment)
+├── train_model.py           # Model training script
+├── textcat_model.pkl        # Trained Naive Bayes model
+├── tfidf_vectorizer.pkl     # TF-IDF vectorizer
+├── customer_feedback.csv    # Training dataset (500 samples)
+│
+├── requirements.txt         # Python dependencies
+├── runtime.txt              # Python version for Render
+├── render.yaml              # Render deployment config
+├── Procfile                 # Render startup command
+├── Dockerfile               # Docker configuration
+├── docker-compose.yml       # Docker Compose setup
+└── README.md                # This file
 ```
 
 ---
 
-## 📁 Project Structure
+## 🚀 Deployment
 
-```
-text-categorization/
-├── functions/                    # Firebase Cloud Functions
-│   ├── main.py                  # Serverless backend
-│   └── requirements.txt         # Python dependencies
-├── public/                      # Frontend (Firebase Hosting)
-│   ├── index.html              # UI
-│   ├── script.js               # Client logic
-│   └── style.css               # Styling
-├── scripts/                     # Utility scripts
-│   └── upload_models.py        # Upload models to Cloud Storage
-├── .github/workflows/          # CI/CD pipelines
-│   └── deploy.yml              # GitHub Actions
-├── app.py                      # Flask API (local dev)
-├── train_model.py              # ML model training
-├── customer_reviews_dataset.csv # Training data (500 samples)
-├── textcat_model.pkl           # Trained classifier
-├── tfidf_vectorizer.pkl        # Text vectorizer
-├── Dockerfile                  # Container image
-├── docker-compose.yml          # Multi-container setup
-├── firebase.json               # Firebase configuration
-├── firestore.rules             # Database security rules
-├── storage.rules               # Storage security rules
-└── DEPLOYMENT.md              # Deployment guide
-```
+### Prerequisites
+- GitHub account
+- Render account (for backend + database)
+- Netlify account (for frontend)
+
+### Deploy Backend to Render
+
+1. **Connect GitHub Repository**
+   - Go to [Render Dashboard](https://dashboard.render.com/)
+   - Click "New +" → "Web Service"
+   - Connect your GitHub repository: `ShivaprasadMurashillin/textcat-app`
+
+2. **Configure Web Service**
+   ```
+   Name: textcat-app
+   Environment: Python 3
+   Build Command: pip install -r requirements.txt
+   Start Command: gunicorn app:app
+   ```
+
+3. **Set Environment Variables**
+   ```
+   FLASK_ENV=production
+   DATABASE_URL=<your-render-postgres-url>
+   ```
+
+4. **Create PostgreSQL Database**
+   - In Render Dashboard → "New +" → "PostgreSQL"
+   - Name: `textcat-database`
+   - Copy the Internal Database URL
+   - Add it to your web service environment variables as `DATABASE_URL`
+
+5. **Deploy**
+   - Render will automatically build and deploy
+   - Your API will be live at: `https://textcat-app.onrender.com`
+
+### Deploy Frontend to Netlify
+
+1. **Connect GitHub Repository**
+   - Go to [Netlify Dashboard](https://app.netlify.com/)
+   - Click "Add new site" → "Import an existing project"
+   - Choose GitHub and select: `ShivaprasadMurashillin/textcat-app`
+
+2. **Configure Build Settings**
+   ```
+   Base directory: frontend
+   Build command: (leave empty)
+   Publish directory: .
+   ```
+
+3. **Set Environment Variables** (optional)
+   ```
+   API_URL=https://textcat-app.onrender.com
+   ```
+
+4. **Deploy**
+   - Netlify will automatically deploy
+   - Your app will be live at: `https://wonderful-truffle-84e414.netlify.app`
+
+5. **Auto-Deploy on Git Push**
+   - Both Render and Netlify watch the `main` branch
+   - Automatic deployments on every `git push`
 
 ---
 
@@ -158,42 +229,49 @@ text-categorization/
   - Confidence scores
 
 - ✅ **Backend API**
-  - Flask REST API
-  - Firebase Firestore integration
-  - CORS enabled
+  - Flask REST API on Render
+  - PostgreSQL database integration
+  - CORS enabled for cross-origin requests
   - Error handling and logging
+  - Health check endpoint
 
 - ✅ **Frontend**
   - Responsive web interface
+  - Dark mode with deep blue/purple theme
+  - Single and batch analysis modes
+  - CSV file upload for batch processing
   - Real-time classification
-  - Category-specific styling
+  - Category-specific styling with emojis
   - Confidence visualization
+  - History tracking with localStorage
+
+- ✅ **Batch Analysis**
+  - Process up to 100 feedbacks at once
+  - Progress tracking with animated progress bar
+  - Comprehensive statistics dashboard
+  - Interactive charts (category distribution, confidence levels)
+  - Individual result cards with details
+  - Export options: CSV, JSON, Copy Summary, Copy All Results
 
 - ✅ **Cloud Integration**
-  - Firebase Cloud Functions
+  - Render Web Services for API hosting
+  - Render PostgreSQL for database
+  - Netlify CDN for frontend delivery
   - Automatic scaling
-  - Cloud Storage for models
-  - Firestore database
+  - GitHub auto-deploy
 
-### Production Features
+### Security
 
-- ✅ **Security**
-  - Input validation and sanitization
-  - Firestore security rules
-  - Storage security rules
-  - Rate limiting ready
+- ✅ Input validation and sanitization
+- ✅ CORS configuration
+- ✅ Rate limiting ready
+- ✅ Secure database connections
 
-- ✅ **Monitoring**
-  - Health check endpoints
-  - Structured logging
-  - Performance metrics
-  - Error tracking
+### Monitoring
 
-- ✅ **DevOps**
-  - Docker containerization
-  - CI/CD with GitHub Actions
-  - Automated testing
-  - Environment management
+- ✅ Health check endpoints
+- ✅ Structured logging
+- ✅ Error tracking
 
 ---
 
@@ -230,8 +308,7 @@ Response:
     "description": "Technical issues or system errors"
   },
   "processing_time_ms": 145.23,
-  "firestore_id": "abc123xyz",
-  "timestamp": "2025-11-12T10:30:00Z"
+  "timestamp": "2025-01-12T10:30:00Z"
 }
 ```
 
@@ -246,8 +323,7 @@ Response:
   "service": "text-categorization-api",
   "version": "1.0.0",
   "models_status": "loaded",
-  "firestore_status": "connected",
-  "timestamp": "2025-11-12T10:30:00Z"
+  "timestamp": "2025-01-12T10:30:00Z"
 }
 ```
 
@@ -256,16 +332,21 @@ Response:
 ## 🧪 Testing
 
 ```bash
-# Run local tests
-pytest functions/tests/
+# Test locally
+python app.py
 
 # Test API endpoint
-curl -X POST http://localhost:5000/predict \
+curl -X POST http://localhost:5000/api/predict \
   -H "Content-Type: application/json" \
   -d '{"feedback": "Great service!"}'
 
 # Test health check
-curl http://localhost:5000/
+curl http://localhost:5000/api/health
+
+# Test production API
+curl -X POST https://textcat-app.onrender.com/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{"feedback": "App is very slow"}'
 ```
 
 ---
@@ -274,25 +355,18 @@ curl http://localhost:5000/
 
 ### Environment Variables
 
-Create `.env` file:
+Create `.env` file for local development:
 
 ```env
-FLASK_ENV=production
-FLASK_DEBUG=False
-FIREBASE_PROJECT_ID=your-project-id
-MODEL_BUCKET=your-project.appspot.com
+FLASK_ENV=development
+FLASK_DEBUG=True
+DATABASE_URL=postgresql://user:password@localhost/textcat_db
 ```
 
-### Firebase Configuration
-
-Update `.firebaserc`:
-
-```json
-{
-  "projects": {
-    "default": "your-project-id"
-  }
-}
+For production (Render):
+```env
+FLASK_ENV=production
+DATABASE_URL=<render-postgres-url>
 ```
 
 ---
@@ -303,7 +377,7 @@ Update `.firebaserc`:
 |--------|-------|
 | Model Accuracy | 87.23% |
 | Average Prediction Time | ~150ms |
-| Cold Start Time | ~2-3s |
+| Cold Start Time (Render) | ~2-3s |
 | Warm Start Time | ~100-200ms |
 | Max Throughput | ~50 req/sec |
 
@@ -311,33 +385,36 @@ Update `.firebaserc`:
 
 ## 🛣️ Roadmap
 
-### Phase 1: Firebase PaaS ✅
-- [x] Cloud Functions backend
-- [x] Firebase Hosting
-- [x] Firestore database
-- [x] Cloud Storage for models
-- [x] CI/CD pipeline
+### Phase 1: Production Deployment ✅
+- [x] Render backend deployment
+- [x] Netlify frontend hosting
+- [x] PostgreSQL database
+- [x] CI/CD pipeline (GitHub auto-deploy)
+- [x] Dark mode UI
+- [x] Batch analysis feature
+- [x] CSV upload and export
 
 ### Phase 2: Advanced Features 🚧
 - [ ] User authentication
 - [ ] Admin dashboard
 - [ ] Analytics and insights
-- [ ] Batch processing API
+- [ ] Email notifications
 - [ ] Multi-language support
+- [ ] API rate limiting
 
-### Phase 3: IaaS Migration 📋
-- [ ] AWS EC2 deployment
-- [ ] Azure VM deployment
-- [ ] Kubernetes orchestration
-- [ ] Multi-region setup
-- [ ] Advanced monitoring
-
-### Phase 4: ML Improvements 📋
+### Phase 3: ML Improvements 📋
 - [ ] Fine-tuned BERT model
 - [ ] Active learning pipeline
 - [ ] A/B testing framework
 - [ ] Model versioning
-- [ ] Explainable AI
+- [ ] Explainable AI (LIME/SHAP)
+
+### Phase 4: Scale & Performance 📋
+- [ ] Redis caching
+- [ ] Load balancing
+- [ ] Multi-region deployment
+- [ ] Advanced monitoring (Datadog/New Relic)
+- [ ] Kubernetes orchestration
 
 ---
 
@@ -359,19 +436,22 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Team
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
-- Email: your.email@example.com
+**Built by:**
+- **Shivaprasad** - Project Lead & ML Engineer
+- **Vaishnavi** - Frontend Developer
+- **Bhavana** - Backend Developer
+
+**GitHub:** [@ShivaprasadMurashillin](https://github.com/ShivaprasadMurashillin)
 
 ---
 
 ## 🙏 Acknowledgments
 
 - scikit-learn for ML capabilities
-- Firebase for cloud infrastructure
+- Render for cloud infrastructure
+- Netlify for CDN hosting
 - Dataset contributors
 - Open source community
 
@@ -380,8 +460,8 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 ## 📞 Support
 
 - 📖 [Documentation](DEPLOYMENT.md)
-- 🐛 [Issue Tracker](https://github.com/yourusername/text-categorization/issues)
-- 💬 [Discussions](https://github.com/yourusername/text-categorization/discussions)
+- 🐛 [Issue Tracker](https://github.com/ShivaprasadMurashillin/textcat-app/issues)
+- 💬 [Discussions](https://github.com/ShivaprasadMurashillin/textcat-app/discussions)
 
 ---
 

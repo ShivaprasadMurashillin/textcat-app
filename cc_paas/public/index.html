@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-powered text categorization system for customer feedback analysis">
+  <title>Text Categorization System | AI Customer Feedback Analysis</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🧾 Text Categorization System</h1>
+      <p class="subtitle">AI-Powered Customer Feedback Analysis</p>
+      <div class="header-controls">
+        <label class="dark-toggle">
+          <input id="darkModeToggle" type="checkbox" aria-label="Toggle dark mode">
+          <span>Dark</span>
+        </label>
+        <div class="examples" aria-hidden="false">
+          <strong>Examples:</strong>
+          <button class="example-btn">App crashes when uploading photos</button>
+          <button class="example-btn">Please add dark mode</button>
+          <button class="example-btn">Why is pricing so high?</button>
+        </div>
+      </div>
+    </header>
+    
+    <main>
+      <div class="input-section">
+        <label for="feedbackInput">Enter Customer Feedback:</label>
+        <textarea 
+          id="feedbackInput" 
+          placeholder="Example: The app crashes every time I try to login..."
+          aria-label="Customer feedback text input"
+        ></textarea>
+        <div class="quick-controls">
+          <button id="pasteExampleBtn" class="btn-secondary">Use Example</button>
+          <div id="historyContainer" class="history-container" aria-live="polite"></div>
+        </div>
+        
+        <div class="button-group">
+          <button id="predictBtn" class="btn-primary">
+            <span class="btn-icon">🔍</span>
+            Classify Feedback
+          </button>
+          <button id="clearBtn" class="btn-secondary">
+            <span class="btn-icon">🗑️</span>
+            Clear
+          </button>
+        </div>
+      </div>
+      
+      <div id="result" class="result-section" style="display: none;">
+        <div class="result-header">
+          <h2>Classification Result</h2>
+          <div class="result-actions">
+            <button id="copyResultBtn" class="btn-secondary" title="Copy result to clipboard">📋 Copy</button>
+            <button id="saveResultBtn" class="btn-secondary" title="Save result locally">💾 Save</button>
+          </div>
+        </div>
+        <div id="resultContent"></div>
+      </div>
+      
+      <div id="loading" class="loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Analyzing feedback...</p>
+      </div>
+      
+      <div id="error" class="error-message" style="display: none;"></div>
+    </main>
+    
+    <footer>
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-label">Model Accuracy:</span>
+          <span class="stat-value">87.23%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Categories:</span>
+          <span class="stat-value">5</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Status:</span>
+          <span id="apiStatus" class="stat-value">Checking...</span>
+        </div>
+      </div>
+      <p class="footer-text">Powered by Firebase & scikit-learn</p>
+    </footer>
+  </div>
+  
+  <script type="module" src="script.js"></script>
+</body>
+</html>

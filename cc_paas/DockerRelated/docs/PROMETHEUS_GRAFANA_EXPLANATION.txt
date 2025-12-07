@@ -1,0 +1,831 @@
+=================================================================================
+  PROMETHEUS & GRAFANA MONITORING - PROJECT EXPLANATION
+  Text Categorization Application with Performance Monitoring
+=================================================================================
+
+=================================================================================
+SECTION 1: WHAT IS PROMETHEUS?
+=================================================================================
+
+DEFINITION:
+Prometheus is an open-source monitoring and alerting system that collects and 
+stores metrics as time-series data. It continuously scrapes (collects) metrics 
+from configured targets at specified intervals.
+
+WHAT IT DOES IN YOUR PROJECT:
+1. Every 5 seconds, Prometheus visits: http://localhost:5000/metrics
+2. Reads performance metrics exposed by your Flask application
+3. Stores these metrics in a time-series database with timestamps
+4. Allows querying historical data using PromQL (Prometheus Query Language)
+5. Provides API endpoints for other tools (like Grafana) to access the data
+
+KEY FEATURES:
+- Multi-dimensional data model (metrics with key-value labels)
+- Powerful query language (PromQL)
+- No dependency on distributed storage (single server node)
+- Time-series collection via HTTP pull model
+- Supports service discovery and static configuration
+- Multiple modes of graphing and dashboard support
+
+=================================================================================
+SECTION 2: WHAT IS GRAFANA?
+=================================================================================
+
+DEFINITION:
+Grafana is an open-source analytics and interactive visualization platform. It 
+connects to various data sources (like Prometheus) and displays metrics through 
+customizable dashboards with graphs, charts, and alerts.
+
+WHAT IT DOES IN YOUR PROJECT:
+1. Connects to Prometheus as a data source
+2. Queries metrics using PromQL
+3. Visualizes data as beautiful graphs, charts, and gauges
+4. Provides real-time dashboard with auto-refresh (every 5 seconds)
+5. Allows interactive exploration of metrics
+6. Supports alerting when metrics exceed thresholds
+
+KEY FEATURES:
+- Beautiful, customizable dashboards
+- Support for multiple data sources
+- Rich visualization options (graphs, gauges, pie charts, tables)
+- Template variables for dynamic dashboards
+- Alert rules and notifications
+- User authentication and authorization
+- Dashboard sharing and collaboration
+
+=================================================================================
+SECTION 3: SYSTEM ARCHITECTURE
+=================================================================================
+
+COMPONENT FLOW:
+┌─────────────────────────────────────────────────────────┐
+│  FLASK APPLICATION (textcat-app:5000)                   │
+│  ------------------------------------------------       │
+│  • Handles ML prediction requests                       │
+│  • Tracks metrics using prometheus_client library       │
+│  • Exposes /metrics endpoint in Prometheus format       │
+│  • Metrics update in real-time with each request        │
+└──────────────┬──────────────────────────────────────────┘
+               │
+               │ HTTP GET /metrics (every 5 seconds)
+               │
+               ▼
+┌─────────────────────────────────────────────────────────┐
+│  PROMETHEUS (prometheus:9090)                           │
+│  ------------------------------------------------       │
+│  • Scrapes /metrics endpoint every 5 seconds            │
+│  • Parses and stores metrics in time-series database    │
+│  • Stores: metric_name{labels} value timestamp          │
+│  • Example: app_requests_total{method="POST"} 150       │
+│  • Retains data for 15 days                             │
+│  • Provides PromQL query interface                      │
+└──────────────┬──────────────────────────────────────────┘
+               │
+               │ PromQL Queries
+               │
+               ▼
+┌─────────────────────────────────────────────────────────┐
+│  GRAFANA (grafana:3000)                                 │
+│  ------------------------------------------------       │
+│  • Queries Prometheus for metrics data                  │
+│  • Transforms data into visualizations                  │
+│  • Displays 7 panels in custom dashboard                │
+│  • Auto-refreshes every 5 seconds                       │
+│  • Provides user-friendly interface                     │
+└─────────────────────────────────────────────────────────┘
+
+DOCKER NETWORK:
+All three services run in the same Docker network called "monitoring", which 
+allows them to communicate using service names (app, prometheus, grafana) 
+instead of IP addresses.
+
+=================================================================================
+SECTION 4: CODE IMPLEMENTATION IN app.py
+=================================================================================
+
+IMPORTS AND SETUP:
+--------------------
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+import time
+
+# These imports add Prometheus monitoring capability to Flask
+
+
+METRICS DEFINED:
+--------------------
+1. REQUEST_COUNT (Counter)
+   - Type: Counter (monotonically increasing)
+   - Name: app_requests_total
+   - Purpose: Count total HTTP requests
+   - Labels: method (GET/POST), endpoint (predict/health), status (200/404/500)
+   - Example: app_requests_total{method="POST",endpoint="predict",status="200"} 150
+
+2. REQUEST_LATENCY (Histogram)
+   - Type: Histogram (distribution of values)
+   - Name: app_request_latency_seconds
+   - Purpose: Measure request response time
+   - Labels: method, endpoint
+   - Buckets: Automatically creates percentiles (p50, p95, p99)
+   - Example: Used to calculate "95% of requests finish in under 250ms"
+
+3. PREDICTIONS_COUNT (Counter)
+   - Type: Counter
+   - Name: app_predictions_total
+   - Purpose: Count ML predictions by category
+   - Labels: category (Bug Report, Feature Request, Positive Feedback, etc.)
+   - Example: app_predictions_total{category="Bug Report"} 45
+
+4. MODEL_LOADED (Gauge)
+   - Type: Gauge (can go up or down)
+   - Name: app_model_loaded
+   - Purpose: Indicate if ML model is loaded (1=yes, 0=no)
+   - Example: app_model_loaded 1
+
+5. ACTIVE_REQUESTS (Gauge)
+   - Type: Gauge
+   - Name: app_active_requests
+   - Purpose: Track concurrent requests being processed
+   - Example: app_active_requests 3
+
+
+MIDDLEWARE IMPLEMENTATION:
+--------------------------
+@app.before_request
+def before_request():
+    """Called before processing each request"""
+    request.start_time = time.time()    # Record start time
+    ACTIVE_REQUESTS.inc()                # Increment active requests counter
+
+@app.after_request
+def after_request(response):
+    """Called after processing each request"""
+    # Calculate how long the request took
+    request_latency = time.time() - request.start_time
+    
+    # Record the request in counter with labels
+    REQUEST_COUNT.labels(
+        method=request.method,           # GET, POST, etc.
+        endpoint=request.endpoint,       # predict, health, etc.
+        status=response.status_code      # 200, 404, 500, etc.
+    ).inc()
+    
+    # Record the latency in histogram
+    REQUEST_LATENCY.labels(
+        method=request.method,
+        endpoint=request.endpoint
+    ).observe(request_latency)
+    
+    # Decrement active requests counter
+    ACTIVE_REQUESTS.dec()
+    
+    return response
+
+
+PREDICTION TRACKING:
+--------------------
+@app.route('/predict', methods=['POST'])
+def predict():
+    # ... existing prediction code ...
+    prediction = MODEL.predict(text_vec)[0]
+    
+    # Track this prediction by category
+    PREDICTIONS_COUNT.labels(category=prediction).inc()
+    
+    return jsonify(result)
+
+
+METRICS ENDPOINT:
+-----------------
+@app.route('/metrics')
+def metrics():
+    """Expose metrics in Prometheus format"""
+    return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
+
+This endpoint returns metrics in Prometheus format, for example:
+# HELP app_requests_total Total number of requests
+# TYPE app_requests_total counter
+app_requests_total{method="POST",endpoint="predict",status="200"} 150.0
+app_requests_total{method="GET",endpoint="health",status="200"} 5.0
+
+
+MODEL LOADING TRACKING:
+-----------------------
+def load_models():
+    global MODEL, VECTORIZER
+    try:
+        MODEL = joblib.load('textcat_model.pkl')
+        VECTORIZER = joblib.load('tfidf_vectorizer.pkl')
+        MODEL_LOADED.set(1)  # Set gauge to 1 (loaded)
+    except Exception as e:
+        MODEL_LOADED.set(0)  # Set gauge to 0 (failed)
+        raise
+
+=================================================================================
+SECTION 5: PROMETHEUS CONFIGURATION
+=================================================================================
+
+FILE: prometheus/prometheus.yml
+--------------------------------
+global:
+  scrape_interval: 5s          # Scrape targets every 5 seconds
+  evaluation_interval: 5s      # Evaluate rules every 5 seconds
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]  # Monitor Prometheus itself
+
+  - job_name: "textcat-app"
+    static_configs:
+      - targets: ["app:5000"]        # Target Flask app (Docker service name)
+    metrics_path: "/metrics"         # Path to scrape
+    scrape_interval: 5s              # Scrape every 5 seconds
+
+
+WHAT THIS DOES:
+1. Prometheus makes HTTP GET request to http://app:5000/metrics every 5 seconds
+2. Parses the Prometheus-format text response
+3. Extracts all metrics and their values
+4. Stores them with timestamp in internal database
+5. Makes data available for querying via PromQL
+
+=================================================================================
+SECTION 6: GRAFANA DASHBOARD CONFIGURATION
+=================================================================================
+
+DATA SOURCE SETUP:
+------------------
+File: grafana/provisioning/datasources/prometheus.yml
+
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy                      # Grafana queries on behalf of user
+    url: http://prometheus:9090        # Prometheus service URL
+    isDefault: true                    # Default data source
+    editable: true                     # Users can edit
+    jsonData:
+      timeInterval: "5s"               # Minimum query interval
+
+
+DASHBOARD PANELS:
+-----------------
+File: grafana/dashboards/textcat-dashboard.json
+
+The dashboard includes 7 panels:
+
+1. REQUEST RATE (Time Series Graph)
+   Query: rate(app_requests_total[1m])
+   Shows: Requests per second over time
+   Visualization: Line graph with different colors for each endpoint
+
+2. TOTAL REQUESTS (Gauge)
+   Query: sum(app_requests_total)
+   Shows: Cumulative number of requests
+   Visualization: Gauge with color thresholds (green/yellow/red)
+
+3. ACTIVE REQUESTS (Stat)
+   Query: app_active_requests
+   Shows: Current number of requests being processed
+   Visualization: Big number with trend indicator
+
+4. REQUEST LATENCY (Time Series Graph)
+   Query: histogram_quantile(0.95, rate(app_request_latency_seconds_bucket[5m]))
+          histogram_quantile(0.50, rate(app_request_latency_seconds_bucket[5m]))
+   Shows: p50 (median) and p95 response times
+   Visualization: Two lines showing latency percentiles
+
+5. PREDICTIONS BY CATEGORY (Pie Chart)
+   Query: sum by (category) (app_predictions_total)
+   Shows: Distribution of predictions across categories
+   Visualization: Donut/pie chart with category breakdown
+
+6. PREDICTION RATE BY CATEGORY (Stacked Area Chart)
+   Query: sum by (category) (rate(app_predictions_total[1m]))
+   Shows: Prediction rate trends by category over time
+   Visualization: Stacked area graph
+
+7. ML MODEL STATUS (Stat)
+   Query: app_model_loaded
+   Shows: Whether model is loaded (1) or not (0)
+   Visualization: Green "LOADED" or Red "NOT LOADED"
+
+=================================================================================
+SECTION 7: KEY METRICS BEING TRACKED
+=================================================================================
+
+METRIC 1: app_requests_total
+----------------------------
+Type: Counter
+Description: Total HTTP requests to the application
+Labels:
+  - method: HTTP method (GET, POST, PUT, DELETE)
+  - endpoint: Flask route name (predict, health, metrics, home)
+  - status: HTTP status code (200, 404, 500, etc.)
+
+Example Values:
+  app_requests_total{method="POST",endpoint="predict",status="200"} 1543
+  app_requests_total{method="GET",endpoint="health",status="200"} 12
+  app_requests_total{method="GET",endpoint="metrics",status="200"} 289
+
+Use Cases:
+  - Monitor API usage patterns
+  - Identify most-used endpoints
+  - Track error rates (5xx status codes)
+  - Calculate request rate: rate(app_requests_total[1m])
+
+
+METRIC 2: app_request_latency_seconds
+--------------------------------------
+Type: Histogram
+Description: Distribution of request response times
+Labels:
+  - method: HTTP method
+  - endpoint: Flask route name
+
+Buckets: [0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0, +Inf]
+
+Example Values:
+  app_request_latency_seconds_bucket{le="0.1"} 1200   # 1200 requests under 100ms
+  app_request_latency_seconds_bucket{le="0.25"} 1450  # 1450 requests under 250ms
+  app_request_latency_seconds_sum 185.3               # Total time spent
+  app_request_latency_seconds_count 1500              # Total requests
+
+Use Cases:
+  - Calculate percentiles: histogram_quantile(0.95, ...)
+  - Identify slow endpoints
+  - Monitor performance degradation
+  - Calculate average: sum/count
+
+
+METRIC 3: app_predictions_total
+--------------------------------
+Type: Counter
+Description: Total ML predictions made
+Labels:
+  - category: Prediction category
+
+Possible Categories:
+  - Bug Report
+  - Feature Request
+  - Pricing Complaint
+  - Positive Feedback
+  - Negative Experience
+
+Example Values:
+  app_predictions_total{category="Bug Report"} 234
+  app_predictions_total{category="Feature Request"} 189
+  app_predictions_total{category="Positive Feedback"} 456
+
+Use Cases:
+  - Understand feedback distribution
+  - Identify trends (which categories are increasing)
+  - Business insights (customer satisfaction metrics)
+  - Model performance monitoring
+
+
+METRIC 4: app_model_loaded
+---------------------------
+Type: Gauge
+Description: Indicates if ML model is successfully loaded
+Values: 1 (loaded) or 0 (not loaded)
+
+Example:
+  app_model_loaded 1
+
+Use Cases:
+  - Alert if model fails to load
+  - System health monitoring
+  - Deployment verification
+
+
+METRIC 5: app_active_requests
+------------------------------
+Type: Gauge
+Description: Number of requests currently being processed
+Values: Integer (0, 1, 2, 3, ...)
+
+Example:
+  app_active_requests 3
+
+Use Cases:
+  - Monitor concurrent load
+  - Detect if system is overloaded
+  - Capacity planning
+  - Alert if value stays high (bottleneck)
+
+=================================================================================
+SECTION 8: PROMETHEUS QUERY LANGUAGE (PromQL) EXAMPLES
+=================================================================================
+
+BASIC QUERIES:
+--------------
+1. Get all requests:
+   app_requests_total
+
+2. Get requests for specific endpoint:
+   app_requests_total{endpoint="predict"}
+
+3. Get error requests (5xx):
+   app_requests_total{status=~"5.."}
+
+
+RATE CALCULATIONS:
+------------------
+1. Requests per second (1 minute average):
+   rate(app_requests_total[1m])
+
+2. Requests per second by endpoint:
+   sum by (endpoint) (rate(app_requests_total[1m]))
+
+3. Error rate:
+   rate(app_requests_total{status=~"5.."}[1m])
+
+
+LATENCY CALCULATIONS:
+---------------------
+1. Average latency:
+   rate(app_request_latency_seconds_sum[1m]) / rate(app_request_latency_seconds_count[1m])
+
+2. 95th percentile (p95):
+   histogram_quantile(0.95, rate(app_request_latency_seconds_bucket[5m]))
+
+3. 99th percentile (p99):
+   histogram_quantile(0.99, rate(app_request_latency_seconds_bucket[5m]))
+
+
+AGGREGATION QUERIES:
+--------------------
+1. Total predictions:
+   sum(app_predictions_total)
+
+2. Predictions by category:
+   sum by (category) (app_predictions_total)
+
+3. Top 3 categories:
+   topk(3, sum by (category) (app_predictions_total))
+
+
+SUCCESS RATE:
+-------------
+1. Success rate percentage:
+   sum(rate(app_requests_total{status="200"}[1m])) / sum(rate(app_requests_total[1m])) * 100
+
+2. Requests per minute:
+   sum(rate(app_requests_total[1m])) * 60
+
+=================================================================================
+SECTION 9: WHAT TO SAY IN YOUR REVIEW/PRESENTATION
+=================================================================================
+
+OPENING STATEMENT:
+------------------
+"I have implemented a comprehensive monitoring solution using Prometheus and 
+Grafana to track the performance, usage patterns, and health metrics of my 
+ML-powered text categorization Flask application deployed in Docker containers."
+
+
+TECHNICAL IMPLEMENTATION OVERVIEW:
+-----------------------------------
+"The monitoring stack consists of three main components:
+
+1. FLASK APPLICATION WITH PROMETHEUS CLIENT
+   - I integrated the prometheus_client library into my Flask application
+   - Created custom metrics including counters, histograms, and gauges
+   - Exposed a /metrics endpoint that returns application metrics in Prometheus format
+   - Implemented middleware to automatically track every HTTP request
+   - Each metric includes labels for detailed categorization
+
+2. PROMETHEUS TIME-SERIES DATABASE
+   - Configured to scrape my Flask app every 5 seconds
+   - Stores metrics with timestamps creating a time-series database
+   - Provides PromQL query language for data analysis
+   - Retains 15 days of historical data
+   - Runs as a Docker container in the same network as the application
+
+3. GRAFANA VISUALIZATION PLATFORM
+   - Connected to Prometheus as a data source
+   - Created a custom dashboard with 7 visualization panels
+   - Auto-refreshes every 5 seconds for real-time monitoring
+   - Provides actionable insights through graphs, gauges, and charts
+   - Supports drill-down analysis and custom time ranges"
+
+
+METRICS EXPLANATION:
+--------------------
+"I am tracking five key metrics:
+
+1. REQUEST COUNT (app_requests_total)
+   - A counter that tracks every HTTP request
+   - Labeled by method, endpoint, and status code
+   - Helps monitor API usage patterns and identify popular endpoints
+   - Example: 1,543 POST requests to /predict with 200 status
+
+2. REQUEST LATENCY (app_request_latency_seconds)
+   - A histogram measuring response time distribution
+   - Enables calculation of percentiles (p50, p95, p99)
+   - Helps identify performance bottlenecks
+   - Example: p95 latency is 230ms, meaning 95% of requests complete in under 230ms
+
+3. PREDICTIONS COUNT (app_predictions_total)
+   - A counter tracking ML predictions by category
+   - Shows distribution across Bug Report, Feature Request, etc.
+   - Provides business insights into customer feedback patterns
+   - Example: 456 Positive Feedback predictions vs 234 Bug Reports
+
+4. MODEL STATUS (app_model_loaded)
+   - A gauge indicating if the ML model loaded successfully
+   - Value of 1 means loaded, 0 means failed
+   - Critical for ensuring prediction functionality
+
+5. ACTIVE REQUESTS (app_active_requests)
+   - A gauge showing concurrent requests being processed
+   - Helps detect system overload
+   - Normal values: 0-10, High load: 50+
+   - Used for capacity planning"
+
+
+DASHBOARD EXPLANATION:
+----------------------
+"The Grafana dashboard provides real-time visualization through 7 panels:
+
+PANEL 1: Request Rate Graph
+- Line graph showing requests per second over time
+- Helps identify traffic patterns and peak usage times
+- Spikes indicate high load periods
+
+PANEL 2: Total Requests Gauge
+- Displays cumulative request count
+- Color-coded: Green (normal), Yellow (high), Red (very high)
+- Provides instant overview of application usage
+
+PANEL 3: Active Requests Counter
+- Shows current concurrent requests
+- Low values (0-5) indicate healthy system
+- High sustained values (50+) indicate potential bottleneck
+
+PANEL 4: Request Latency Chart
+- Displays p50 (median) and p95 percentile response times
+- Two lines showing typical and worst-case performance
+- Lower values indicate better performance
+
+PANEL 5: Predictions Pie Chart
+- Visual breakdown of predictions by category
+- Largest slice shows most common feedback type
+- Provides business insights at a glance
+
+PANEL 6: Prediction Rate Trend
+- Stacked area chart showing category trends over time
+- Helps identify if certain categories are increasing
+- Useful for prioritizing development efforts
+
+PANEL 7: Model Status Indicator
+- Green "LOADED" or Red "NOT LOADED"
+- Critical health check for ML functionality
+- Immediate alert if model fails"
+
+
+TECHNICAL BENEFITS:
+-------------------
+"This monitoring implementation provides several key benefits:
+
+OPERATIONAL BENEFITS:
+- Real-time visibility into application performance
+- Historical analysis with 15-day data retention
+- Proactive problem detection before users are affected
+- Data-driven decision making for optimization
+
+PERFORMANCE MONITORING:
+- Track response times and identify slow endpoints
+- Monitor throughput (requests per second)
+- Detect performance degradation immediately
+- Validate that 95% of requests meet SLA (under 500ms)
+
+BUSINESS INSIGHTS:
+- Understand customer feedback distribution
+- Identify trending issues (increase in Bug Reports)
+- Measure customer satisfaction (Positive Feedback percentage)
+- Prioritize feature development based on requests
+
+RELIABILITY:
+- Monitor system health (model loaded, no errors)
+- Detect and alert on anomalies
+- Track error rates and investigate issues
+- Ensure high availability through monitoring"
+
+
+DEMONSTRATION SCENARIO:
+-----------------------
+"Let me demonstrate the system with a real-time example:
+
+1. BASELINE STATE
+   - Currently showing 150 total requests
+   - Average latency: 150ms
+   - Model status: Loaded (green)
+
+2. LOAD TEST (Running 100 predictions)
+   - Watch the Request Rate panel - you'll see the blue line spike
+   - Active Requests will temporarily increase to 1-5
+   - Total Requests gauge will increment in real-time
+
+3. ANALYSIS AFTER TEST
+   - Total requests increased to 250
+   - Latency remained stable at 150ms (system handled load well)
+   - Predictions pie chart updated showing distribution:
+     * 20% Bug Reports
+     * 18% Feature Requests  
+     * 30% Positive Feedback
+     * 17% Pricing Complaints
+     * 15% Negative Experience
+
+4. INSIGHTS GAINED
+   - System maintained performance under load (p95 < 250ms)
+   - 30% positive feedback indicates good customer satisfaction
+   - Low error rate (0%) shows system stability
+   - Capacity to handle 5 requests/second without degradation"
+
+
+PRODUCTION READINESS:
+---------------------
+"This monitoring stack demonstrates production-ready practices:
+
+OBSERVABILITY:
+- Metrics (performance and usage data)
+- Visualization (Grafana dashboards)
+- Querying (PromQL for ad-hoc analysis)
+
+SCALABILITY:
+- Docker containerization allows horizontal scaling
+- Prometheus can handle high cardinality metrics
+- Grafana supports multiple data sources
+
+INDUSTRY STANDARDS:
+- Prometheus is CNCF graduated project
+- Grafana is industry-standard visualization tool
+- PromQL is widely adopted query language
+- Used by companies like SoundCloud, Ericsson, DigitalOcean
+
+EXTENSIBILITY:
+- Easy to add new metrics (just add a counter/gauge/histogram)
+- Can integrate with alerting systems (PagerDuty, Slack)
+- Supports multiple exporters for system metrics
+- Can add more dashboards for different views"
+
+
+CHALLENGES AND SOLUTIONS:
+-------------------------
+"During implementation, I encountered and solved:
+
+CHALLENGE 1: Dashboard showing 'No Data'
+- Issue: Grafana datasource UID mismatch
+- Solution: Updated dashboard JSON to use correct Prometheus UID
+- Learning: Importance of proper datasource configuration
+
+CHALLENGE 2: Docker build taking long time
+- Issue: Installing large Python packages (numpy, scipy)
+- Solution: Optimized Dockerfile with proper layer caching
+- Learning: Docker layer caching significantly speeds up rebuilds
+
+CHALLENGE 3: Metrics not updating
+- Issue: Flask middleware not called for all requests
+- Solution: Properly implemented @app.before_request and @app.after_request
+- Learning: Flask request lifecycle and middleware execution order"
+
+
+FUTURE ENHANCEMENTS:
+--------------------
+"Potential improvements to the monitoring system:
+
+1. ALERTING:
+   - Configure alerts when latency exceeds 1 second
+   - Alert if error rate goes above 1%
+   - Notify if model fails to load
+   - Send alerts to Slack or email
+
+2. ADDITIONAL METRICS:
+   - Database query performance
+   - Memory and CPU usage
+   - Model inference time separately
+   - Queue depth if using task queues
+
+3. DISTRIBUTED TRACING:
+   - Implement Jaeger or Zipkin for request tracing
+   - Track request flow across microservices
+   - Identify bottlenecks in request processing
+
+4. LOG AGGREGATION:
+   - Integrate with ELK stack (Elasticsearch, Logstash, Kibana)
+   - Centralized log management
+   - Correlation between logs and metrics"
+
+
+CONCLUSION:
+-----------
+"In conclusion, this monitoring implementation provides:
+- Comprehensive visibility into application performance
+- Real-time dashboards for operational awareness  
+- Historical data for trend analysis
+- Production-ready observability stack
+- Foundation for alerting and incident response
+
+The system demonstrates understanding of:
+- DevOps practices and observability
+- Time-series databases and metrics collection
+- Data visualization and dashboard design
+- Performance monitoring and optimization
+- Production deployment considerations
+
+This monitoring stack is scalable, extensible, and follows industry best 
+practices for modern cloud-native applications."
+
+=================================================================================
+SECTION 10: TECHNICAL TERMINOLOGY REFERENCE
+=================================================================================
+
+TIME-SERIES DATABASE:
+- Database optimized for storing data points indexed by time
+- Each metric has: timestamp, metric name, value, labels
+- Efficient for querying time-based data
+- Example: "At 3:15 PM, app had 150 requests"
+
+SCRAPING:
+- Process of Prometheus collecting metrics from targets
+- HTTP GET request to /metrics endpoint
+- Happens at regular intervals (5 seconds in our case)
+- Target exposes metrics in Prometheus text format
+
+COUNTER:
+- Metric type that only increases (never decreases)
+- Resets to 0 on application restart
+- Examples: total requests, total predictions
+- Use rate() function to calculate per-second increase
+
+GAUGE:
+- Metric type that can go up or down
+- Represents a current state or value
+- Examples: active requests, model status, memory usage
+- Can be set, incremented, or decremented
+
+HISTOGRAM:
+- Metric type that samples observations
+- Counts observations in configurable buckets
+- Automatically provides sum and count
+- Used for percentile calculations
+- Example: request latency distribution
+
+LABELS:
+- Key-value pairs attached to metrics
+- Allow dimensionality in metrics
+- Examples: endpoint="predict", status="200"
+- Enables filtering and aggregation in queries
+
+PROMQL:
+- Prometheus Query Language
+- Used to query and analyze metrics
+- Supports: aggregation, rate calculation, percentiles
+- Example: rate(app_requests_total[1m])
+
+PERCENTILE (p50, p95, p99):
+- Statistical measure of distribution
+- p50 (median): 50% of values are below
+- p95: 95% of values are below (common SLA metric)
+- p99: 99% of values are below (tail latency)
+
+DATA SOURCE:
+- Configuration in Grafana pointing to data origin
+- In our case: Prometheus at http://prometheus:9090
+- Grafana queries this source for dashboard data
+
+DASHBOARD:
+- Collection of panels displaying visualizations
+- Can include: graphs, gauges, tables, alerts
+- Organized layout for monitoring multiple metrics
+
+OBSERVABILITY:
+- Ability to understand system internal state
+- Three pillars: Metrics, Logs, Traces
+- Our project implements metrics pillar
+- Enables debugging and performance analysis
+
+CARDINALITY:
+- Number of unique time series for a metric
+- High cardinality = many label combinations
+- Example: requests labeled by user_id has high cardinality
+- Important for Prometheus resource planning
+
+RETENTION:
+- How long historical data is kept
+- Our Prometheus: 15 days retention
+- Balances disk space vs historical analysis needs
+- Can be configured in Prometheus command-line flags
+
+SCRAPE INTERVAL:
+- Time between metric collections
+- Our configuration: 5 seconds
+- Lower interval = more real-time, more storage
+- Higher interval = less detail, less storage
+
+=================================================================================
+END OF DOCUMENT
+=================================================================================

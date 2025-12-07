@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: textcat-grafana
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    plan: free
+    region: singapore
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: GF_SERVER_HTTP_PORT
+        value: 3000
+      - key: GF_SECURITY_ADMIN_USER
+        value: admin
+      - key: GF_SECURITY_ADMIN_PASSWORD
+        value: admin
+    healthCheckPath: /api/health

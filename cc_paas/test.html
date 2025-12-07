@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Test</title>
+</head>
+<body>
+    <h1>Test Text Categorization</h1>
+    <button onclick="testAPI()">Click to Test API</button>
+    <pre id="result"></pre>
+
+    <script>
+    async function testAPI() {
+        const result = document.getElementById('result');
+        result.textContent = 'Testing...';
+        
+        try {
+            const response = await fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: 'The app crashes when I click submit'
+                })
+            });
+            
+            const data = await response.json();
+            result.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+            result.textContent = 'Error: ' + error.message;
+        }
+    }
+    </script>
+</body>
+</html>

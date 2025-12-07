@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.pkl
+venv/
+.venv/
+env/
+ENV/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+
+# Credentials
+serviceAccountKey.json
+firebase-key.json
+*.pem
+*.key
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Models (if too large for git)
+# *.pkl
+
+# Logs
+logs/
+*.log
+
+# Node
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials
+serviceAccountKey.json
+firebase-key.json
+*.pem
+*.key
+
+# Docker
+.dockerignore
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Data files
+*.csv
+report.html
+
+# LaTeX
+*.aux
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.pdf

@@ -1,0 +1,35 @@
+// 🌩️ Your Firebase config snippet
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "text-cat-feedback.firebaseapp.com",
+  projectId: "text-cat-feedback",
+  storageBucket: "text-cat-feedback.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:abcd1234"
+};
+
+// 🧠 Button click handler
+document.getElementById("predictBtn").addEventListener("click", async () => {
+  const feedback = document.getElementById("feedbackInput").value.trim();
+  if (!feedback) {
+    alert("Please enter some feedback text.");
+    return;
+  }
+
+  const resultDiv = document.getElementById("result");
+  resultDiv.innerText = "⏳ Predicting...";
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ feedback })
+    });
+
+    const data = await res.json();
+    resultDiv.innerText = `📂 Predicted Category: ${data.prediction}`;
+  } catch (err) {
+    console.error(err);
+    resultDiv.innerText = "❌ Error connecting to the server.";
+  }
+});

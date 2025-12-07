@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug - Button Test</title>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('=== BUTTON DEBUG TEST ===');
+      
+      // Test 1: Check if buttons exist
+      const buttons = {
+        'predictBtn': document.getElementById('predictBtn'),
+        'randomExample': document.getElementById('randomExample'),
+        'copyResultBtn': document.getElementById('copyResultBtn'),
+        'clearBtn': document.getElementById('clearBtn'),
+        'clearInput': document.getElementById('clearInput'),
+        'analyzeBatchBtn': document.getElementById('analyzeBatchBtn'),
+        'uploadCSVBtn': document.getElementById('uploadCSVBtn'),
+        'copySummary': document.getElementById('copySummary'),
+        'copyAllResults': document.getElementById('copyAllResults')
+      };
+      
+      console.log('Button existence check:');
+      Object.entries(buttons).forEach(([id, el]) => {
+        console.log(`  ${id}: ${el ? '✅ EXISTS' : '❌ MISSING'}`);
+      });
+      
+      // Test 2: Try to add click listeners
+      console.log('\nAdding click listeners...');
+      Object.entries(buttons).forEach(([id, el]) => {
+        if (el) {
+          try {
+            el.addEventListener('click', () => {
+              console.log(`🖱️ ${id} clicked!`);
+              alert(`${id} button works!`);
+            });
+            console.log(`  ✅ ${id} listener added`);
+          } catch (e) {
+            console.error(`  ❌ ${id} listener failed:`, e);
+          }
+        }
+      });
+      
+      // Test 3: Check if script.js is loaded
+      console.log('\nChecking script.js functions:');
+      const functions = ['handlePredict', 'handleClear', 'loadRandomExample', 'copyResultToClipboard', 'handleBatchAnalysis', 'handleCSVUpload'];
+      functions.forEach(fn => {
+        console.log(`  ${fn}: ${typeof window[fn] !== 'undefined' ? '✅ LOADED' : '❌ MISSING'}`);
+      });
+      
+      console.log('\n=== DEBUG TEST COMPLETE ===');
+      console.log('Now click the buttons to test...');
+    });
+  </script>
+</head>
+<body style="font-family: Arial; padding: 20px;">
+  <h1>🔍 Button Debug Test</h1>
+  <p>Open the browser console (F12) to see diagnostics</p>
+  
+  <div style="margin: 20px 0;">
+    <h2>Test Buttons:</h2>
+    <button id="predictBtn" style="padding: 10px 20px; margin: 5px;">Predict Button</button>
+    <button id="randomExample" style="padding: 10px 20px; margin: 5px;">Random Example</button>
+    <button id="copyResultBtn" style="padding: 10px 20px; margin: 5px;">Copy Result</button>
+    <button id="clearBtn" style="padding: 10px 20px; margin: 5px;">Clear Button</button>
+    <button id="clearInput" style="padding: 10px 20px; margin: 5px;">Clear Input</button>
+    <button id="analyzeBatchBtn" style="padding: 10px 20px; margin: 5px;">Analyze Batch</button>
+    <button id="uploadCSVBtn" style="padding: 10px 20px; margin: 5px;">Upload CSV</button>
+    <button id="copySummary" style="padding: 10px 20px; margin: 5px;">Copy Summary</button>
+    <button id="copyAllResults" style="padding: 10px 20px; margin: 5px;">Copy All Results</button>
+  </div>
+  
+  <div style="background: #f0f0f0; padding: 15px; border-radius: 5px;">
+    <h3>Instructions:</h3>
+    <ol>
+      <li>Open browser console (F12)</li>
+      <li>Check if all buttons show ✅ EXISTS</li>
+      <li>Check if listeners are ✅ added</li>
+      <li>Click each button - should show alert if working</li>
+      <li>If this works but main app doesn't, there's a script loading issue</li>
+    </ol>
+  </div>
+</body>
+</html>

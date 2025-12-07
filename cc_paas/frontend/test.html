@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Connection</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Testing API Connection...</h1>
+    <div id="result"></div>
+    
+    <script>
+        // Test API
+        fetch('http://127.0.0.1:5000/health')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = 
+                    '<p class="success">✅ API Connected! Status: ' + data.status + '</p>' +
+                    '<p>If you see this, the API works. Now check the main page.</p>';
+            })
+            .catch(err => {
+                document.getElementById('result').innerHTML = 
+                    '<p class="error">❌ API Connection Failed: ' + err.message + '</p>' +
+                    '<p>Make sure Flask is running on port 5000</p>';
+            });
+    </script>
+</body>
+</html>

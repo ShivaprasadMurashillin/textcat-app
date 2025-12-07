@@ -15,19 +15,19 @@ The system is currently building:
 
 ### 1. Start All Services
 ```cmd
-cd C:\ThirdYear\CC\DockerRelated
+cd C:\ThirdYear\CC\monitoring
 docker-compose -f docker-compose.yml up -d
 ```
 
 ### 2. Verify Containers Running
 ```cmd
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml ps
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml ps
 ```
 
 Expected output:
 ```
 NAME           IMAGE                    STATUS          PORTS
-textcat-app    dockerrelated-app        Up             0.0.0.0:5000->5000/tcp
+textcat-app    monitoring-app        Up             0.0.0.0:5000->5000/tcp
 prometheus     prom/prometheus:latest   Up             0.0.0.0:9090->9090/tcp
 grafana        grafana/grafana:latest   Up             0.0.0.0:3000->3000/tcp
 ```
@@ -119,12 +119,12 @@ app_model_loaded
 ### View Logs
 ```cmd
 # All services
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml logs -f
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml logs -f
 
 # Specific service
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml logs -f app
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml logs -f prometheus
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml logs -f grafana
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml logs -f app
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml logs -f prometheus
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml logs -f grafana
 ```
 
 ### Check Container Status
@@ -134,17 +134,17 @@ docker ps
 
 ### Restart Services
 ```cmd
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml restart app
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml restart app
 ```
 
 ### Stop All Services
 ```cmd
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml down
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml down
 ```
 
 ### Complete Cleanup (Remove volumes)
 ```cmd
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml down -v
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml down -v
 ```
 
 ---
@@ -220,11 +220,11 @@ After deployment, verify:
 ### Issue: Container won't start
 ```cmd
 # Check logs
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml logs app
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml logs app
 
 # Rebuild container
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml build --no-cache app
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml up -d
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml build --no-cache app
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml up -d
 ```
 
 ### Issue: Prometheus target DOWN
@@ -236,7 +236,7 @@ docker ps | findstr textcat
 curl http://localhost:5000/health
 
 # Restart Prometheus
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml restart prometheus
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml restart prometheus
 ```
 
 ### Issue: Grafana shows "No data"
@@ -267,7 +267,8 @@ netstat -ano | findstr :5000
 
 **🎉 Once build completes, run:**
 ```cmd
-docker-compose -f C:\ThirdYear\CC\DockerRelated\docker-compose.yml up -d
+docker-compose -f C:\ThirdYear\CC\monitoring\docker-compose.yml up -d
 ```
 
 **Then visit:** http://localhost:3000 (Grafana) to see your monitoring dashboard!
+

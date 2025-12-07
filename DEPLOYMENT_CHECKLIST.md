@@ -10,9 +10,9 @@
 - [ ] `Procfile` exists with correct command
 
 ### 2. Frontend Configuration
-- [ ] `frontend/index.html` exists and loads
-- [ ] `frontend/style.css` exists and loads
-- [ ] `frontend/script.js` exists and loads
+- [ ] `web-frontend/index.html` exists and loads
+- [ ] `web-frontend/style.css` exists and loads
+- [ ] `web-frontend/script.js` exists and loads
 - [ ] API_BASE_URL in `script.js` will be updated after Render deployment
 
 ### 3. Git Setup
@@ -25,7 +25,7 @@
 - [ ] Backend runs locally: `python app.py`
 - [ ] Health endpoint works: `curl http://127.0.0.1:5000/health`
 - [ ] Predict endpoint works with sample data
-- [ ] Frontend loads locally: `python -m http.server 8080` in `frontend/`
+- [ ] Frontend loads locally: `python -m http.server 8080` in `web-frontend/`
 - [ ] Frontend → Backend communication works
 
 ---
@@ -44,11 +44,11 @@
 - [ ] Predict endpoint works with test data
 
 ### Frontend (Netlify)
-- [ ] Updated API_BASE_URL in `frontend/script.js` with Render URL
+- [ ] Updated API_BASE_URL in `web-frontend/script.js` with Render URL
 - [ ] Committed and pushed changes to GitHub
 - [ ] Netlify account created
 - [ ] Site deployed (drag-and-drop OR GitHub integration)
-- [ ] Base directory set to `frontend/` (if using GitHub)
+- [ ] Base directory set to `web-frontend/` (if using GitHub)
 - [ ] Site loads without errors
 - [ ] Browser console shows no errors (F12)
 
@@ -161,3 +161,4 @@ Your deployment is successful when:
 ---
 
 **Good luck with your deployment!** 🚀
+

@@ -14,7 +14,7 @@ C:/ThirdYear/CC/
 │   ├── Dockerfile                    # Docker build configuration
 │   └── ...
 │
-└── DockerRelated/                    # Monitoring setup
+└── monitoring/                    # Monitoring setup
     ├── docker-compose.yml            # ✅ NEW - Orchestrates all services
     ├── prometheus/
     │   └── prometheus.yml            # ✅ UPDATED - Scrapes app metrics
@@ -35,7 +35,7 @@ C:/ThirdYear/CC/
 ### 1. Navigate to Monitoring Directory
 
 ```cmd
-cd C:\ThirdYear\CC\DockerRelated
+cd C:\ThirdYear\CC\monitoring
 ```
 
 ### 2. Build and Start All Services
@@ -59,7 +59,7 @@ docker-compose ps
 Expected output:
 ```
 NAME                IMAGE                    STATUS          PORTS
-textcat-app         dockerrelated-app        Up             0.0.0.0:5000->5000/tcp
+textcat-app         monitoring-app        Up             0.0.0.0:5000->5000/tcp
 prometheus          prom/prometheus:latest   Up             0.0.0.0:9090->9090/tcp
 grafana             grafana/grafana:latest   Up             0.0.0.0:3000->3000/tcp
 ```
@@ -232,7 +232,7 @@ docker-compose up -d --build app
 ## 🔧 Configuration Details
 
 ### Prometheus Configuration
-**File:** `C:/ThirdYear/CC/DockerRelated/prometheus/prometheus.yml`
+**File:** `C:/ThirdYear/CC/monitoring/prometheus/prometheus.yml`
 
 ```yaml
 global:
@@ -374,3 +374,4 @@ Run `docker-compose up -d` and visit:
 - App: http://localhost:5000
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000 (admin/admin)
+

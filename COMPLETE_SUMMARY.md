@@ -27,7 +27,7 @@ c:\cc\
 ├── 📁 .github/workflows/               [CI/CD]
 │   └── deploy.yml                      ✨ Automated testing & deployment
 │
-├── 📁 frontend/                        [Original - Keep for local dev]
+├── 📁 web-frontend/                        [Original - Keep for local dev]
 │   ├── index.html
 │   ├── script.js
 │   └── style.css
@@ -100,7 +100,7 @@ c:\cc\
 
 #### Original
 ```javascript
-// frontend/script.js
+// web-frontend/script.js
 - Basic fetch request
 - Simple error message
 - No retry logic
@@ -617,3 +617,4 @@ Your system features:
 **Production Features**: 40+  
 
 **Ready to deploy in**: 10 minutes ⏱️
+

@@ -38,7 +38,7 @@ docker ps
 **Expected Output:**
 ```
 CONTAINER ID   IMAGE                    STATUS         PORTS
-xxxxx          dockerrelated-app       Up X minutes   0.0.0.0:5000->5000/tcp
+xxxxx          monitoring-app       Up X minutes   0.0.0.0:5000->5000/tcp
 xxxxx          prom/prometheus         Up X minutes   0.0.0.0:9090->9090/tcp
 xxxxx          grafana/grafana         Up X minutes   0.0.0.0:3000->3000/tcp
 ```
@@ -144,7 +144,7 @@ Login: admin / admin
 1. Click **☰** (hamburger menu) → **Dashboards**
 2. Click **Import** (or **New** → **Import**)
 3. Click **Upload JSON file**
-4. Select: `C:\ThirdYear\CC\DockerRelated\grafana\dashboards\enhanced-dashboard.json`
+4. Select: `C:\ThirdYear\CC\monitoring\grafana\dashboards\enhanced-dashboard.json`
 5. Click **Import**
 
 **Dashboard Shows 15 Panels:**
@@ -181,7 +181,7 @@ Login: admin / admin
 **Generate 50 predictions to show real-time monitoring:**
 
 ```powershell
-cd C:\ThirdYear\CC\DockerRelated
+cd C:\ThirdYear\CC\monitoring
 
 $feedbacks = @(
     "The app crashes on startup",
@@ -412,7 +412,7 @@ Write-Host "`n✓ Demo Complete! Watch metrics update in Grafana!" -ForegroundCo
 
 ## 📚 **DOCUMENTATION FILES**
 
-All documentation available in `C:\ThirdYear\CC\DockerRelated\`:
+All documentation available in `C:\ThirdYear\CC\monitoring\`:
 
 1. **METRICS_DOCUMENTATION.md** - Detailed metrics explanation
 2. **METRICS_SUMMARY.txt** - Quick reference guide
@@ -483,7 +483,7 @@ All documentation available in `C:\ThirdYear\CC\DockerRelated\`:
 
 ### **If containers are stopped:**
 ```powershell
-cd C:\ThirdYear\CC\DockerRelated
+cd C:\ThirdYear\CC\monitoring
 docker-compose up -d
 ```
 
@@ -513,3 +513,4 @@ docker logs grafana
 **END OF DEMONSTRATION GUIDE**
 
 Good luck with your evaluation! 🎓
+

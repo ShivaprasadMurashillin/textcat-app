@@ -41,9 +41,9 @@ def main():
     # Frontend files
     print("🎨 Frontend Files (Netlify):")
     all_good &= check_directory("frontend")
-    all_good &= check_file("frontend/index.html")
-    all_good &= check_file("frontend/style.css")
-    all_good &= check_file("frontend/script.js")
+    all_good &= check_file("web-frontend/index.html")
+    all_good &= check_file("web-frontend/style.css")
+    all_good &= check_file("web-frontend/script.js")
     print()
     
     # Configuration files
@@ -70,15 +70,15 @@ def main():
     # Check API URL in frontend
     print("🔗 Frontend API Configuration:")
     try:
-        with open("frontend/script.js", "r") as f:
+        with open("web-frontend/script.js", "r") as f:
             content = f.read()
             if "YOUR-RENDER-APP" in content:
-                print("   ⚠️  Remember to update API_BASE_URL in frontend/script.js")
+                print("   ⚠️  Remember to update API_BASE_URL in web-frontend/script.js")
                 print("      After deploying to Render!")
             else:
                 print("   ✅ API URL looks configured")
     except:
-        print("   ❌ Could not read frontend/script.js")
+        print("   ❌ Could not read web-frontend/script.js")
     print()
     
     # Final verdict

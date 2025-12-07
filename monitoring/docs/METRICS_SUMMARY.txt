@@ -124,7 +124,7 @@ ROW 6 - DATABASE:
    Grafana Login: admin / admin
 
 📁 DASHBOARD JSON:
-   Location: C:\ThirdYear\CC\DockerRelated\grafana\dashboards\
+   Location: C:\ThirdYear\CC\monitoring\grafana\dashboards\
    Files:    - enhanced-dashboard.json (16 panels) ⭐ RECOMMENDED
              - textcat-dashboard.json (7 panels - original)
 
@@ -260,3 +260,4 @@ CONFIDENCE METRICS:
 
 ================================================================================
 EOF
+

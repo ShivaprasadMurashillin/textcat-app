@@ -39,9 +39,9 @@ def main():
     files_ok &= os.path.exists("Procfile")
     files_ok &= os.path.exists("textcat_model.pkl")
     files_ok &= os.path.exists("tfidf_vectorizer.pkl")
-    files_ok &= os.path.exists("frontend/index.html")
-    files_ok &= os.path.exists("frontend/script.js")
-    files_ok &= os.path.exists("frontend/style.css")
+    files_ok &= os.path.exists("web-frontend/index.html")
+    files_ok &= os.path.exists("web-frontend/script.js")
+    files_ok &= os.path.exists("web-frontend/style.css")
     
     if files_ok:
         print("✅ All required files present")
@@ -128,10 +128,10 @@ def main():
     # Phase 4: Frontend
     print_header("🎨 PHASE 4: Frontend Configuration")
     
-    if check_yes_no("Have you updated API URL in frontend/script.js?"):
+    if check_yes_no("Have you updated API URL in web-frontend/script.js?"):
         print("   ✅ API URL configured")
     else:
-        print("   ❌ Edit frontend/script.js and replace:")
+        print("   ❌ Edit web-frontend/script.js and replace:")
         print("      'https://YOUR-RENDER-APP.onrender.com'")
         print("      with your actual Render URL")
         return
@@ -140,7 +140,7 @@ def main():
         print("   ✅ Changes pushed to GitHub")
     else:
         print("   ❌ Run:")
-        print("      git add frontend/script.js")
+        print("      git add web-frontend/script.js")
         print("      git commit -m 'Update API URL'")
         print("      git push")
         return

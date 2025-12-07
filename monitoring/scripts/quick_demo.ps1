@@ -72,13 +72,14 @@ Write-Host "  1. Import Grafana Dashboard:" -ForegroundColor White
 Write-Host "     - Open http://localhost:3000" -ForegroundColor Gray
 Write-Host "     - Login: admin / admin" -ForegroundColor Gray
 Write-Host "     - Menu (☰) → Dashboards → Import" -ForegroundColor Gray
-Write-Host "     - Upload: C:\ThirdYear\CC\DockerRelated\grafana\dashboards\enhanced-dashboard.json" -ForegroundColor Gray
+Write-Host "     - Upload: C:\ThirdYear\CC\monitoring\grafana\dashboards\enhanced-dashboard.json" -ForegroundColor Gray
 Write-Host "`n  2. Generate Traffic (Optional):" -ForegroundColor White
 Write-Host "     - Run: .\generate_traffic.ps1" -ForegroundColor Gray
 Write-Host "     - Watch metrics update in real-time!" -ForegroundColor Gray
 
 Write-Host "`n📚 Documentation:" -ForegroundColor Yellow
-Write-Host "  Full guide: C:\ThirdYear\CC\DockerRelated\DEPLOYMENT_DEMO_GUIDE.md" -ForegroundColor White
+Write-Host "  Full guide: C:\ThirdYear\CC\monitoring\DEPLOYMENT_DEMO_GUIDE.md" -ForegroundColor White
 
 Write-Host "`n🎯 Ready for evaluation! All services operational." -ForegroundColor Green
 Write-Host ""
+

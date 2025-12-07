@@ -62,7 +62,7 @@ Created test files:
 - `test_copy_csv.html` - Tests CSV parsing and clipboard functions
 
 ### Files Modified
-- `frontend/script.js` - Fixed 5 template literal syntax errors
+- `web-frontend/script.js` - Fixed 5 template literal syntax errors
 
 ### Commits
 - `d5fd9a0` - "Fix copy clipboard functions and add CSV file upload feature"

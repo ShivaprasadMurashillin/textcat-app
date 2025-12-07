@@ -391,7 +391,7 @@ histogram_quantile(0.95, rate(app_db_query_seconds_bucket[5m])) > 1
 ### **Grafana:**
 - URL: http://localhost:3000
 - Login: admin / admin
-- Dashboard JSON: `C:\ThirdYear\CC\DockerRelated\grafana\dashboards\enhanced-dashboard.json`
+- Dashboard JSON: `C:\ThirdYear\CC\monitoring\grafana\dashboards\enhanced-dashboard.json`
 
 ### **Raw Metrics Endpoint:**
 - URL: http://localhost:5000/metrics
@@ -417,3 +417,4 @@ histogram_quantile(0.95, rate(app_db_query_seconds_bucket[5m])) > 1
 2. Set up alerting rules for critical metrics
 3. Consider model retraining to improve confidence scores
 4. Monitor trends over time for performance optimization
+

@@ -1,0 +1,58 @@
+# Git ignore for Docker monitoring setup
+
+# Environment files with secrets
+.env
+*.env
+!.env.example
+
+# Docker volumes
+prometheus-data/
+grafana-data/
+
+# Logs
+logs/
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*_backup.*
+*_old.*
+
+# Database files (if local)
+*.db
+*.sqlite
+*.sqlite3
+
+# Sensitive data
+serviceAccountKey.json
+firebase-key.json
+*_key.json
+credentials.json
+secrets.yaml
+secrets.yml

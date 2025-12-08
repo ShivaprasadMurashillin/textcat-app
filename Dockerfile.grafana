@@ -1,0 +1,22 @@
+FROM grafana/grafana:latest
+
+# Create directories
+USER root
+RUN mkdir -p /etc/grafana/provisioning/datasources && \
+    mkdir -p /etc/grafana/provisioning/dashboards && \
+    mkdir -p /var/lib/grafana/dashboards
+
+# Copy configs
+COPY grafana-datasource.yml /etc/grafana/provisioning/datasources/prometheus.yml
+COPY monitoring/grafana/provisioning/dashboards /etc/grafana/provisioning/dashboards
+COPY monitoring/grafana/dashboards /var/lib/grafana/dashboards
+
+# Set ownership
+RUN chown -R grafana:grafana /etc/grafana /var/lib/grafana
+
+# Set environment variables
+ENV GF_SECURITY_ADMIN_USER=admin
+ENV GF_SECURITY_ADMIN_PASSWORD=admin
+ENV GF_USERS_ALLOW_SIGN_UP=false
+
+USER grafana
